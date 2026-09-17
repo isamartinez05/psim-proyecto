@@ -1,0 +1,28 @@
+﻿[project]
+name = "psim-proyecto"
+version = "0.1.0"
+description = "Estabilidad de los descriptores morfologicos del campo pulmonar frente a estrategias de preprocesamiento y segmentacion en radiografias de torax"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "matplotlib>=3.11.2",
+    "numpy>=2.5.3",
+    "pandas>=3.0.5",
+    "pywavelets>=1.10.0",
+    "scikit-image>=0.26.0",
+    "scipy>=1.18.1",
+    "statsmodels>=0.15.0",
+]
+
+[build-system]
+requires = ["uv_build>=0.12.9,<0.13.0"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "psim"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+    "ruff>=0.16.8",
+]

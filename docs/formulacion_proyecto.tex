@@ -1,0 +1,860 @@
+% Formulación del Proyecto Semestral — PSIM
+% Basado en la plantilla del curso (PlantillaDocumento.tex)
+% -------------------------------------------------------------
+% Requiere en el mismo directorio: Escuela_Rosario_logo.png y referencias.bib
+% Compilar: pdflatex -> bibtex -> pdflatex -> pdflatex
+% -------------------------------------------------------------
+
+\documentclass[12pt,a4paper]{article}
+
+% Paquetes básicos
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish]{babel}
+\usepackage{lmodern}
+\usepackage{geometry}
+\geometry{left=3cm,right=3cm,top=3cm,bottom=3cm,headheight=1.5cm}
+\usepackage{setspace}
+\onehalfspacing
+
+% Paquetes de estilo y utilidades
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    citecolor=blue,
+    urlcolor=blue
+}
+\usepackage{graphicx}
+\usepackage{fancyhdr}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{listings}
+\usepackage{float}
+\usepackage{longtable}
+\usepackage{array}
+\lstset{
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    numbers=left,
+    numberstyle=\tiny,
+    frame=single
+}
+
+% ----------------------------------
+% Configuración de encabezado con logo
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\includegraphics[height=1cm]{Escuela_Rosario_logo.png}}
+\renewcommand{\headrulewidth}{0pt}
+
+% ----------------------------------
+% Campos del trabajo
+\newcommand{\tituloTrabajo}{Estabilidad de los descriptores morfológicos del campo pulmonar frente a estrategias de preprocesamiento y segmentación en radiografías de tórax}
+\newcommand{\autorA}{Juanita Trujillo Narváez}
+\newcommand{\autorB}{Karol Isabella Martínez Villarreal}
+\newcommand{\carrera}{Ingeniería Biomédica}
+\newcommand{\codigoEstudianteA}{1000099467}
+\newcommand{\codigoEstudianteB}{1000099682}
+\newcommand{\cursoCodigo}{PSIM - 2026II - 80}
+\newcommand{\cursoNombre}{Procesamiento de Señales e Imágenes Médicas}
+\newcommand{\docente}{Ing. Pablo Eduardo Caicedo-Rodríguez. Ph.D.}
+\newcommand{\fechaEntrega}{\today}
+% ----------------------------------
+
+\begin{document}
+
+% --------------------
+% Portada
+\thispagestyle{empty}
+\begin{titlepage}
+    \centering
+    {\LARGE \textbf{\tituloTrabajo} \\
+    }
+    \vspace{2cm}
+    {\large \textbf{\autorA}. Cod: \codigoEstudianteA} \\
+    {\large \textbf{\autorB}. Cod: \codigoEstudianteB} \\
+    \vspace{1cm}
+    {\large \carrera} \\
+    \vspace{0.5cm}
+    {\large \cursoCodigo{}} \\
+    Docente: \docente \\
+    \vfill
+    Fecha de entrega: \fechaEntrega
+\end{titlepage}
+
+% --------------------
+\tableofcontents
+\newpage
+
+\begin{abstract}
+    Este documento presenta la formulación del proyecto semestral del curso
+    \cursoNombre{}. Se define el problema de la inestabilidad de los descriptores
+    morfológicos del campo pulmonar en radiografías de tórax posteroanteriores
+    frente a distintas estrategias de preprocesamiento y segmentación, se
+    plantea la pregunta de investigación y los objetivos asociados, se documenta
+    la selección del conjunto de datos entre tres candidatos evaluados, se traza
+    la cobertura de los bloques técnicos de la asignatura y se describe la
+    estructura reproducible del proyecto.
+\end{abstract}
+
+\newpage
+
+\section{Planteamiento del problema}
+
+La radiografía de tórax posteroanterior es una de las modalidades de imagen más
+prescritas en la práctica clínica. Cada píxel de la imagen representa la
+atenuación acumulada que sufre un haz de rayos X al atravesar el tórax, de modo
+que la imagen es una proyección bidimensional de un volumen tridimensional: el
+aire contenido en el parénquima pulmonar atenúa poco y se registra oscuro,
+mientras que el hueso y el mediastino atenúan considerablemente y se registran
+claros.
+
+Sobre esa proyección, la delimitación del campo pulmonar es el paso previo a
+cualquier medición cuantitativa. Esa delimitación es inestable porque el
+contraste entre el pulmón y las estructuras vecinas depende de la tecnología del
+detector, de los parámetros de exposición y de la presencia de hallazgos que
+opacifican el parénquima. Los conjuntos públicos de la National Library of
+Medicine hacen visible el problema: las imágenes de Montgomery se adquirieron con
+radiografía computarizada en doce bits, mientras que las de Shenzhen provienen de
+radiografía digital directa en ocho bits, con resolución variable y codificación
+de escala invertida.
+
+Lo medible directamente en las imágenes es la intensidad de cada píxel y, a
+partir de la región segmentada, su área, su perímetro, su compacidad, su relación
+de aspecto y la simetría entre los campos derecho e izquierdo.
+
+Si la máscara obtenida se desplaza según la estrategia de preprocesamiento
+aplicada, los descriptores morfológicos heredan esa variabilidad y dejan de ser
+comparables entre sujetos o entre sitios de adquisición, aun cuando la anatomía
+subyacente no haya cambiado.
+
+Las técnicas del curso permiten cuantificar ese efecto de manera controlada:
+aplicar estrategias alternativas de realce, umbralización y morfología, medir su
+concordancia contra máscaras trazadas por expertos y estimar cuánto se desplaza
+cada descriptor morfológico respecto a su valor de referencia.
+
+El proyecto no pretende detectar ni diagnosticar tuberculosis, no propone un
+método superior al estado del arte, no evalúa observadores humanos y no
+generaliza sus resultados a otras modalidades ni a otras proyecciones
+radiográficas.
+
+\subsection{Mapa causal-operativo}
+
+El esquema siguiente diferencia las siete etapas que exige la guía, con las
+variables reales del proyecto en lugar de nombres genéricos. La cadena operativa
+va de arriba hacia abajo; los factores de confusión técnicos actúan lateralmente
+sobre las etapas que se indican.
+
+\begin{figure}[H]
+\centering
+\small
+\begin{tabular}{|p{4.6cm}|}
+\hline
+\textbf{1. Imagen original} \\
+Radiografía PA en PNG. Montgomery: 12 bits, escala de grises. Shenzhen: 8 bits, RGB, escala invertida \\
+\hline
+\multicolumn{1}{c}{$\downarrow$} \\
+\hline
+\textbf{2. Calidad y adquisición} \\
+Tecnología del detector (CR o DR), profundidad de bits, resolución espacial, espaciado de píxel, exposición no documentada \\
+\hline
+\multicolumn{1}{c}{$\downarrow$} \\
+\hline
+\textbf{3. Preprocesamiento} \\
+Corrección de inversión, conversión a gris, normalización de rango, realce (ecualización, CLAHE, especificación), reducción de ruido (mediana, gaussiano, frecuencia) \\
+\hline
+\multicolumn{1}{c}{$\downarrow$} \\
+\hline
+\textbf{4. Segmentación del campo pulmonar} \\
+Umbral (fijo, Otsu, adaptativo) seguido de morfología (apertura, cierre, relleno de huecos, componentes mayores) \\
+\hline
+\multicolumn{1}{c}{$\downarrow$} \\
+\hline
+\textbf{5. Características} \\
+Compacidad, relación de aspecto, fracción de área, simetría izquierda-derecha, energía por subbanda wavelet \\
+\hline
+\multicolumn{1}{c}{$\downarrow$} \\
+\hline
+\textbf{6. Resultado cuantitativo} \\
+Error relativo de cada descriptor frente al obtenido sobre la máscara de referencia, estratificado por origen \\
+\hline
+\end{tabular}
+\caption{Mapa causal-operativo del proyecto. La cadena va de la imagen original
+al resultado cuantitativo; los factores de confusión de la Tabla siguiente actúan
+sobre las etapas indicadas.}
+\end{figure}
+
+\begin{table}[H]
+\centering
+\caption{Factores de confusión técnicos y etapa sobre la que actúan.}
+\small
+\begin{tabular}{@{}p{4.4cm}cp{7.6cm}@{}}
+\toprule
+\textbf{Factor de confusión} & \textbf{Etapa} & \textbf{Efecto sobre la cadena} \\
+\midrule
+Tecnología del detector & 2, 3, 4 & La respuesta de contraste y la estructura del ruido difieren; un mismo umbral no produce la misma máscara en los dos orígenes \\
+\addlinespace
+Profundidad de cuantización & 2, 3 & Las métricas de contraste sobre valores crudos no son comparables sin normalizar primero \\
+\addlinespace
+Codificación de intensidad & 1, 3 & Sin corregir la inversión y los tres canales, el umbral segmenta el complemento del campo pulmonar \\
+\addlinespace
+Ausencia de espaciado de píxel & 5 & Impide expresar área y perímetro en milímetros; obliga a que los cinco descriptores sean adimensionales \\
+\addlinespace
+Dispersión de resolución espacial & 2, 5 & El perímetro y la compacidad son sensibles a la escala; obliga a fijar una resolución de trabajo común \\
+\addlinespace
+Hallazgos que opacifican el parénquima & 3, 4 & Reducen el contraste del borde pulmonar y desplazan la máscara en los casos con manifestaciones \\
+\addlinespace
+Convención de trazado de la referencia & 6 & Montgomery excluye corazón y grandes vasos, Shenzhen los delimita; introduce un sesgo sistemático entre orígenes que no puede corregirse \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+El punto del esquema es que el resultado cuantitativo de la etapa 6 no depende
+solo de la anatomía del sujeto, sino de las decisiones tomadas en las etapas 3 y
+4 y de los factores que actúan sobre ellas. La pregunta de investigación indaga
+precisamente cuánto de la variación observada en los descriptores proviene de
+esas decisiones y no del sujeto.
+
+
+% profundidad de bits, parámetros de exposición, hallazgos que opacifican
+% el parénquima, convención de trazado de la máscara de referencia.
+
+\section{Pregunta de investigación}
+
+\begin{quote}
+¿En qué medida las estrategias de realce de intensidad, umbralización y
+morfología modifican la estabilidad de los descriptores morfológicos del campo
+pulmonar (compacidad, relación de aspecto, fracción de área, simetría
+izquierda-derecha), respecto a los descriptores obtenidos sobre la máscara de
+referencia, en radiografías de tórax de los conjuntos Montgomery y Shenzhen de la
+National Library of Medicine?
+\end{quote}
+
+\section{Objetivos}
+
+\subsection{Objetivo general}
+
+Evaluar el efecto de las estrategias de normalización, realce, umbralización y
+morfología sobre la estabilidad de los descriptores morfológicos del campo
+pulmonar en radiografías de tórax posteroanteriores de los conjuntos Montgomery y
+Shenzhen de la National Library of Medicine, mediante la comparación cuantitativa
+contra los descriptores derivados de máscaras de referencia trazadas por
+expertos, para determinar qué combinación de técnicas produce mediciones
+morfológicas reproducibles entre sitios de adquisición.
+
+\subsection{Objetivos específicos}
+
+\begin{description}
+    \item[OE1.] Caracterizar las propiedades de digitalización y adquisición de
+    ambos conjuntos: resolución espacial, profundidad de cuantización, número de
+    canales, rango y distribución de intensidades. \emph{(Fase 1)}
+
+    \item[OE2.] Comparar estrategias de normalización y reducción de ruido en
+    dominio espacial y de frecuencia sobre una muestra controlada estratificada
+    por origen y clase. \emph{(Fases 1--2)}
+
+    \item[OE3.] Comparar estrategias de segmentación del campo pulmonar (umbral
+    global, adaptativo, Otsu) combinadas con operaciones morfológicas, contra las
+    máscaras de referencia. \emph{(Fase 2)}
+
+    \item[OE4.] Cuantificar el desplazamiento de cada descriptor morfológico y de
+    textura respecto a su valor de referencia bajo cada combinación de
+    estrategias. \emph{(Fases 2--3)}
+
+    \item[OE5.] Analizar si los descriptores obtenidos con la combinación
+    seleccionada difieren entre imágenes con y sin hallazgos de tuberculosis, y
+    documentar limitaciones y sensibilidad. \emph{(Fase 3)}
+\end{description}
+
+\subsection{Trazabilidad de los objetivos}
+
+\begin{table}[H]
+\centering
+\caption{Trazabilidad de los objetivos específicos a fase, producto y criterio.}
+\small
+\begin{tabular}{@{}p{0.8cm}p{1.1cm}p{5.2cm}p{5.2cm}@{}}
+\toprule
+\textbf{OE} & \textbf{Fase} & \textbf{Producto verificable} & \textbf{Criterio de cumplimiento} \\
+\midrule
+OE1 & 1 & \texttt{docs/dataset\_card.md}, \texttt{results/fase1/ caracterizacion.csv}, \texttt{figures/fase1/histogramas.png} & Las 800 imágenes con dimensiones, profundidad, canales y estadísticos registrados; identificadas y corregidas las de escala invertida \\
+\addlinespace
+OE2 & 1--2 & \texttt{results/fase2/ metricas\_realce.csv}, \texttt{figures/fase2/ realce\_comparacion.png}, \texttt{figures/fase2/espectros.png} & Cada estrategia con contraste RMS, desviación estándar del fondo y conservación de bordes; se conservan solo las que mejoran al menos una métrica sin degradar las otras \\
+\addlinespace
+OE3 & 2 & \texttt{results/fase2/ dice\_por\_estrategia.csv}, \texttt{figures/fase2/mascaras.png} & Dice y Jaccard por imagen sobre el conjunto de validación, reportados estratificados por origen \\
+\addlinespace
+OE4 & 2--3 & \texttt{results/fase3/ tabla\_caracteristicas.csv}, \texttt{figures/fase3/ error\_descriptores.png} & Error relativo mediano e intervalo intercuartílico por descriptor y estrategia; identificado el descriptor más estable \\
+\addlinespace
+OE5 & 3 & \texttt{results/fase3/ analisis\_estadistico.csv}, informe final & Prueba de hipótesis definida a priori, con tamaño de efecto e intervalo de confianza; análisis de sensibilidad incluido \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Variables y criterio de éxito}
+
+\begin{table}[H]
+\centering
+\caption{Definición de variables del estudio.}
+\small
+\begin{tabular}{@{}p{4.2cm}p{9.5cm}@{}}
+\toprule
+\textbf{Elemento} & \textbf{Definición} \\
+\midrule
+Variable de entrada & Intensidad de píxel de la radiografía PA, más los parámetros de cada estrategia (tamaño de kernel, tipo de umbral, elemento estructurante, frecuencia de corte, nivel de descomposición) \\
+\addlinespace
+Variable de salida & Descriptores morfológicos del campo pulmonar segmentado \\
+\addlinespace
+Características a extraer & Compacidad, relación de aspecto, fracción de área respecto al campo de imagen, simetría entre campo derecho e izquierdo, energía por subbanda wavelet \\
+\addlinespace
+Variable de comparación & Los mismos descriptores calculados sobre la máscara de referencia \\
+\addlinespace
+Métrica principal & Error relativo de cada descriptor respecto a su valor de referencia \\
+\addlinespace
+Métricas secundarias & Coeficiente Dice, índice de Jaccard, contraste RMS, desviación estándar del fondo, conservación de bordes \\
+\addlinespace
+Unidad de análisis & La imagen, que corresponde a un sujeto (a confirmar en Fase 1) \\
+\addlinespace
+Criterio de éxito técnico & Identificar al menos una combinación cuyo error relativo mediano sea menor que el de la línea base sin preprocesamiento, en al menos tres de los cinco descriptores, de forma consistente en ambos orígenes \\
+\addlinespace
+Limitación esperada & Las máscaras de referencia provienen de dos procedencias con convenciones posiblemente distintas, lo que puede sesgar la comparación entre orígenes \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Todos los descriptores son adimensionales a propósito, porque el conjunto
+Shenzhen no documenta espaciado de píxel y las medidas en milímetros no serían
+comparables entre los dos conjuntos.
+
+\section{Conjunto de datos}
+
+El proyecto utiliza los conjuntos Montgomery County CXR Set y Shenzhen Hospital
+CXR Set, publicados por la U.S. National Library of Medicine. Juntos suman 800
+radiografías de tórax posteroanteriores, de las cuales 704 disponen de máscara de
+campo pulmonar trazada por personas. La ficha técnica completa, con identificación,
+contenido, variable de interés, limitaciones y protocolo de reproducibilidad, se
+encuentra en \texttt{docs/dataset\_card.md}; la comparación de candidatos con sus
+dieciséis campos documentados está en \texttt{docs/datasets\_candidatos.csv}.
+
+La elección de dos conjuntos en lugar de uno responde directamente a la pregunta
+de investigación. Montgomery se adquirió mediante radiografía computarizada en doce
+bits; Shenzhen mediante radiografía digital directa en ocho bits, codificada en tres
+canales y con la escala de grises invertida. Esa diferencia entre sitios de
+adquisición no es un inconveniente del conjunto de datos: es la condición de
+comparación que hace medible la estabilidad de los descriptores.
+
+\subsection{Matriz de decisión}
+
+\begin{table}[H]
+\centering
+\caption{Calificación de los candidatos de 0 a 2 en cada criterio. La última columna
+corresponde a la pareja finalmente seleccionada.}
+\small
+\begin{tabular}{@{}p{4.3cm}ccccc@{}}
+\toprule
+\textbf{Criterio} & \textbf{JSRT} & \textbf{MC} & \textbf{SH} & \textbf{CheX} & \textbf{MC+SH} \\
+\midrule
+Ajuste a la pregunta            & 1 & 1 & 1 & 0 & 2 \\
+Documentación                   & 2 & 2 & 1 & 2 & 2 \\
+Licencia/acceso                 & 1 & 2 & 2 & 1 & 2 \\
+Tamaño computacional            & 2 & 2 & 2 & 1 & 2 \\
+Metadatos y unidad de análisis  & 2 & 2 & 1 & 1 & 1 \\
+Cobertura de técnicas PSIM      & 1 & 1 & 2 & 0 & 2 \\
+\midrule
+\textbf{Total (máx. 12)}        & \textbf{9} & \textbf{10} & \textbf{9} & \textbf{5} & \textbf{11} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent JSRT: Japanese Society of Radiological Technology con máscaras SCR.
+MC: Montgomery County CXR Set. SH: Shenzhen Hospital CXR Set. CheX: CheXmask.
+
+\subsection{Justificación de la selección}
+
+El puntaje no decide por sí solo. Montgomery obtiene diez puntos por separado y la
+pareja once, pero la diferencia decisiva está en un único criterio: ninguno de los
+conjuntos individuales permite responder la pregunta planteada, porque todos
+provienen de un solo sitio de adquisición y la pregunta pide explícitamente
+determinar qué combinación produce mediciones reproducibles \emph{entre} sitios.
+Un candidato con buen puntaje agregado que no puede responder la pregunta no es un
+candidato viable.
+
+JSRT se descarta pese a tener las máscaras más completas del grupo, que incluyen
+pulmones, corazón y clavículas y habrían permitido calcular la relación
+cardiotorácica. El acceso requiere solicitud y aprobación, y el cronograma de quince
+semanas no admite depender de un tiempo de respuesta que no controlamos. Es un
+descarte por riesgo de ejecución, no por calidad del conjunto.
+
+CheXmask se descarta por una razón metodológica que ningún puntaje compensa. Sus
+máscaras fueron generadas por un modelo de aprendizaje profundo, no trazadas por
+personas. Usarlas como referencia invalidaría el criterio de comparación del
+proyecto, que consiste precisamente en medir cuánto se aleja una segmentación
+automática de una referencia humana, y contravendría la restricción de no emplear
+Machine Learning. Se documenta su evaluación y descarte porque es el primer
+resultado que aparece al buscar máscaras para estos conjuntos.
+
+La pareja Montgomery y Shenzhen se selecciona porque satisface las condiciones
+mínimas exigidas y porque su heterogeneidad es funcional al problema. Ambos son de
+descarga directa sin registro, están desidentificados bajo exención IRB, tienen
+procedencia y citación localizables, y suman 4.08 GB, un volumen manejable con los
+recursos del equipo. Montgomery aporta máscaras supervisadas por radiólogo para el
+cien por ciento de sus imágenes y documenta espaciado de píxel; Shenzhen aporta
+volumen, una tecnología de detector distinta y las particularidades de codificación
+que obligan a ejercitar conversión de espacio de color, corrección de inversión y
+normalización de rango dinámico.
+
+La pareja no obtiene puntaje perfecto, y el criterio donde pierde es el que más
+importa vigilar. Ninguno de los dos conjuntos incluye identificador de paciente, de
+modo que la equivalencia entre imagen y sujeto es un supuesto que debe verificarse
+en Fase 1; Shenzhen no documenta espaciado de píxel, razón por la cual todos los
+descriptores del proyecto son adimensionales; y 96 de sus imágenes carecen de
+máscara, por lo que los objetivos OE3 y OE4 operan sobre el subconjunto de 704
+casos con referencia, estratificado por origen. Estas tres limitaciones están
+declaradas antes de procesar los datos y acotan el alcance de las conclusiones.
+
+
+
+\section{Diseño de las tres fases}
+
+El proyecto se organiza en tres fases acumulativas: cada una deja productos que la
+siguiente consume. La Fase 1 entrega los datos caracterizados y el protocolo; la
+Fase 2 entrega las estrategias comparadas con evidencia cuantitativa; la Fase 3
+reconstruye el flujo completo con las estrategias justificadas y responde la
+pregunta de investigación.
+
+\subsection{Fase 1 — Formulación, adquisición y caracterización}
+
+\begin{table}[H]
+\centering
+\caption{Productos esperados de la Fase 1 y su ubicación en el repositorio.}
+\small
+\begin{tabular}{@{}p{6.3cm}p{7.2cm}@{}}
+\toprule
+\textbf{Producto esperado} & \textbf{Ubicación} \\
+\midrule
+Propuesta y pregunta de investigación & \texttt{docs/formulacion\_proyecto.tex} \\
+Ficha del conjunto de datos & \texttt{docs/dataset\_card.md} \\
+Procedimiento reproducible de descarga & \texttt{data/raw/README.md} y \texttt{scripts/check\_dataset.py} \\
+Inspección de formato, dimensiones, rango y metadatos & \texttt{results/fase1/caracterizacion.csv} \\
+Análisis de muestreo, cuantización, resolución espacial e intensidad & \texttt{figures/fase1/submuestreo.png}, \texttt{figures/fase1/requantizacion.png}, \texttt{figures/fase1/rango\_intensidad.png} \\
+Caracterización de píxeles, vecindades, conectividad y regiones & \texttt{src/psim/geometry.py}, \texttt{figures/fase1/conectividad.png}, \texttt{figures/fase1/distancia\_borde.png} \\
+Estadísticas básicas e histogramas iniciales & \texttt{figures/fase1/histogramas.png}, \texttt{figures/fase1/histogramas\_comparados.png} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Pregunta de control: ¿qué propiedades de la adquisición pueden afectar
+los resultados de las fases posteriores?}
+
+Siete propiedades están identificadas antes de procesar los datos, y cada una tiene
+una consecuencia concreta sobre las fases siguientes.
+
+\begin{enumerate}
+    \item \textbf{Tecnología del detector.} Montgomery se adquirió con radiografía
+    computarizada y Shenzhen con radiografía digital directa. La respuesta de
+    contraste y la estructura del ruido difieren, de modo que un mismo umbral no
+    produce la misma máscara en los dos orígenes. Obliga a reportar toda métrica
+    estratificada por sitio.
+
+    \item \textbf{Profundidad de cuantización.} Doce bits frente a ocho. Cualquier
+    métrica de contraste calculada sobre valores crudos no es comparable entre
+    orígenes sin normalizar primero el rango dinámico.
+
+    \item \textbf{Codificación de intensidad.} Las imágenes de Shenzhen vienen en
+    tres canales RGB y con la escala de grises invertida. Sin corregir ambas cosas,
+    cualquier umbral segmenta el complemento de lo que se busca.
+
+    \item \textbf{Ausencia de espaciado de píxel en Shenzhen.} Impide expresar área
+    o perímetro en milímetros. Es la razón por la cual los cinco descriptores del
+    proyecto son adimensionales.
+
+    \item \textbf{Dispersión de resolución espacial.} Montgomery es homogéneo en
+    torno a 4020x4892 píxeles; Shenzhen varía alrededor de 3000x3000. Descriptores
+    sensibles a la escala, como el perímetro, se ven afectados, lo que obliga a
+    fijar una resolución de trabajo común y a verificar con submuestreo controlado
+    que esa reducción no altera los descriptores.
+
+    \item \textbf{Convención de trazado de la máscara de referencia.} Las máscaras
+    de Montgomery excluyen corazón y grandes vasos; las de Shenzhen los delimitan.
+    Es un sesgo sistemático entre orígenes que no puede corregirse y que se declara
+    como la principal limitación del estudio.
+
+    \item \textbf{Archivos anómalos.} Nueve imágenes de Shenzhen pesan menos de
+    2~MB frente a un promedio de 5.43~MB, lo que sugiere resolución o codificación
+    distinta. Deben identificarse en la caracterización y decidirse explícitamente
+    si se conservan o se excluyen, con el criterio documentado.
+\end{enumerate}
+
+\subsection{Fase 2 — Procesamiento y extracción de características}
+
+La Fase 2 implementa de forma reproducible los bloques de intensidad, vecindad,
+histogramas, bordes, umbralización, morfología, dominio de frecuencia y wavelets
+definidos en la matriz de técnicas. Ninguna comparación se resuelve por apariencia:
+cada una se decide con una de las métricas definidas a continuación, fijadas antes
+de ejecutar el procesamiento.
+
+\begin{table}[H]
+\centering
+\caption{Métricas de decisión de la Fase 2.}
+\small
+\begin{tabular}{@{}p{3.6cm}p{10.0cm}@{}}
+\toprule
+\textbf{Métrica} & \textbf{Definición operativa} \\
+\midrule
+Contraste RMS & Desviación estándar de la intensidad normalizada dentro de la región torácica. Mide si el realce separa mejor el parénquima del fondo. \\
+\addlinespace
+Desviación del fondo & Desviación estándar en una región de aire fuera del paciente. Mide ruido residual: un filtro útil la reduce. \\
+\addlinespace
+Conservación de borde & Razón entre la magnitud media del gradiente sobre el contorno de referencia antes y después del filtrado. Un valor cercano a uno indica que el filtro no difuminó el borde. \\
+\addlinespace
+Coeficiente Dice & Solapamiento entre la máscara obtenida y la de referencia. Métrica principal de segmentación. \\
+\addlinespace
+Índice de Jaccard & Solapamiento alternativo, más severo con errores de área. Se reporta junto al Dice. \\
+\addlinespace
+Estabilidad de área y perímetro & Variación del área y el perímetro de la máscara entre estrategias, respecto a la referencia. \\
+\addlinespace
+Energía espectral por banda & Fracción de energía del espectro en bandas radiales. Permite comparar filtrado en frecuencia contra filtrado espacial. \\
+\addlinespace
+Energía por subbanda wavelet & Energía de los coeficientes de detalle por nivel. Sirve como descriptor de textura y como comparación entre orígenes. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+El trabajo de esta fase procede sobre una muestra controlada estratificada por
+origen y por clase antes de extenderse al conjunto completo, para que los
+parámetros se ajusten sin recorrer 800 imágenes en cada iteración. Los productos
+acumulables son las tablas de métricas por estrategia en \texttt{results/fase2/},
+los paneles comparativos en \texttt{figures/fase2/} y los módulos de
+\texttt{src/psim/} que implementan cada bloque.
+
+\subsection{Fase 3 — Integración, validación y presentación final}
+
+\begin{table}[H]
+\centering
+\caption{Requisitos de la Fase 3 y forma de cumplimiento.}
+\small
+\begin{tabular}{@{}p{5.6cm}p{7.9cm}@{}}
+\toprule
+\textbf{Requisito} & \textbf{Cumplimiento previsto} \\
+\midrule
+Reconstruir el flujo completo desde los datos originales & \texttt{scripts/reproduce.py} parte de \texttt{data/raw/} y regenera todo producto derivado \\
+Seleccionar las transformaciones justificadas por la Fase 2 & La selección se toma de \texttt{results/fase2/}, no por criterio visual; la matriz de técnicas se actualiza a \texttt{conservado} o \texttt{descartado} con el valor que sustenta la decisión \\
+Obtener las características finales & \texttt{results/fase3/tabla\_caracteristicas.csv} \\
+Responder la pregunta de investigación & Comparación del error relativo mediano por descriptor y estrategia contra la línea base sin preprocesamiento, en ambos orígenes \\
+Aplicar análisis estadístico & Estadística descriptiva, estimación de distribuciones y prueba de hipótesis entre grupos, con tamaño de efecto e intervalo de confianza \\
+Regresión logística o polinómica & No planeada. La pregunta es descriptiva y comparativa, no predictiva; la decisión queda documentada en la matriz de técnicas \\
+Análisis de sensibilidad y limitaciones & Variación de los parámetros de la combinación seleccionada para verificar que la conclusión no depende de un ajuste particular, más las limitaciones declaradas en la ficha del conjunto de datos \\
+Regenerar tablas y figuras mediante código & Ninguna figura ni tabla del informe final se edita a mano; todas se producen desde \texttt{src/psim/} y se escriben en \texttt{figures/} y \texttt{results/} \\
+Presentar el proyecto en el Laboratorio 03 & \texttt{docs/sustentacion.tex}, semana 15 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Correspondencia entre fases y objetivos}
+
+\begin{table}[H]
+\centering
+\caption{Distribución de los objetivos específicos entre las tres fases.}
+\small
+\begin{tabular}{@{}lccc@{}}
+\toprule
+\textbf{Objetivo} & \textbf{Fase 1} & \textbf{Fase 2} & \textbf{Fase 3} \\
+\midrule
+OE1 & completo & --- & --- \\
+OE2 & inicia & completa & --- \\
+OE3 & --- & completo & --- \\
+OE4 & --- & inicia & completa \\
+OE5 & --- & --- & completo \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+De las 53 técnicas de la matriz, 14 corresponden a la Fase 1, 30 a la Fase 2 y 9 a
+la Fase 3.
+
+\section{Cobertura de bloques técnicos}
+
+La matriz completa está en \texttt{docs/matriz\_tecnicas.csv}, con 53 filas y
+once columnas: bloque, técnica, fase, entrada, parámetros, producto, métrica,
+decisión esperada, archivo de código, figura o tabla, y estado. Cada fila
+responde las cuatro preguntas de trazabilidad: qué entrada recibe la técnica, qué
+parámetro se modifica o estima, qué producto genera y qué evidencia permitirá
+decidir si aporta al problema.
+
+\begin{table}[H]
+\centering
+\caption{Distribución de las técnicas por bloque y fase.}
+\small
+\begin{tabular}{@{}p{5.6cm}ccccp{3.4cm}@{}}
+\toprule
+\textbf{Bloque} & \textbf{N} & \textbf{F1} & \textbf{F2} & \textbf{F3} & \textbf{Módulo} \\
+\midrule
+Representación y digitalización & 9 & 9 & --- & --- & \texttt{io.py}, \texttt{geometry.py} \\
+Espacios e intensidad & 5 & 3 & 2 & --- & \texttt{color.py} \\
+Operaciones de vecindad & 9 & --- & 9 & --- & \texttt{spatial.py} \\
+Histogramas & 5 & 2 & 3 & --- & \texttt{histogram.py} \\
+Umbralización y morfología & 10 & --- & 10 & --- & \texttt{segmentation.py} \\
+Dominio de frecuencia & 5 & --- & 5 & --- & \texttt{frequency.py} \\
+Wavelets y multirresolución & 4 & --- & 1 & 3 & \texttt{wavelets.py} \\
+Características y estadística & 5 & --- & --- & 5 & \texttt{features.py}, \texttt{stats.py} \\
+Modelo estadístico opcional & 1 & --- & --- & 1 & \texttt{stats.py} \\
+\midrule
+\textbf{Total} & \textbf{53} & \textbf{14} & \textbf{30} & \textbf{9} & \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Técnicas evaluadas que no se espera conservar}
+
+Cobertura completa no significa encadenar operaciones arbitrariamente. Seis
+técnicas se incluyen como experimentos controlados, con la expectativa explícita
+de descartarlas si la evidencia no las respalda. Ese descarte es un resultado del
+proyecto siempre que esté sustentado cuantitativamente.
+
+\begin{table}[H]
+\centering
+\caption{Técnicas con descarte previsto y criterio de decisión.}
+\small
+\begin{tabular}{@{}p{3.4cm}p{10.2cm}@{}}
+\toprule
+\textbf{Técnica} & \textbf{Criterio de decisión} \\
+\midrule
+Filtro de media & Se descarta si degrada el borde más que la mediana con igual reducción de ruido \\
+\addlinespace
+Prewitt & Se descarta si no supera a Sobel en concordancia con el borde de referencia \\
+\addlinespace
+Roberts & Se descarta si resulta más sensible al ruido que los otros operadores \\
+\addlinespace
+Emboss & Experimento direccional; no se espera que forme parte del flujo final \\
+\addlinespace
+Top-hat & Experimento de realce de costillas; se conserva solo si mejora la separación del campo pulmonar \\
+\addlinespace
+Espacio HSV & Se descarta si la saturación resulta nula, lo que confirmaría que las imágenes de Shenzhen son escala de grises replicada en tres canales \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Modelo estadístico}
+
+La matriz incluye una fila para regresión logística con estado
+\texttt{no\_planeado}. La guía la ofrece como opción y este proyecto no la
+ejecuta: la pregunta de investigación es descriptiva y comparativa, no
+predictiva. El objetivo OE5 compara los descriptores entre imágenes con y sin
+hallazgos de tuberculosis mediante prueba de hipótesis, con tamaño de efecto e
+intervalo de confianza, y el resultado se reporta como caracterización
+morfométrica. En ningún caso se presenta como detección, tamizaje ni diagnóstico.
+La fila se conserva en la matriz para dejar constancia de que la opción fue
+evaluada y descartada por razones metodológicas, no por omisión.
+
+\subsection{Estado y actualización}
+
+Las 53 filas están en estado \texttt{planeado}, salvo la de regresión logística.
+Conforme avance el desarrollo, cada fila pasa a \texttt{conservado} o
+\texttt{descartado}, acompañada del valor de la métrica que sustenta la decisión.
+La matriz es, por tanto, un documento vivo: su estado final en la semana 15
+constituye el registro de qué técnicas del curso aportaron al problema y cuáles
+no, con la evidencia de cada caso.
+
+
+
+\section{Cronograma}
+
+El cronograma completo, con dependencias, responsables, evidencias y estado por
+semana, está en \texttt{docs/cronograma.csv}. La tabla siguiente lo resume.
+
+\begin{table}[H]
+\centering
+\caption{Cronograma semestral. L indica liderazgo y R revisión.}
+\small
+\begin{tabular}{@{}cp{6.4cm}p{3.3cm}c@{}}
+\toprule
+\textbf{Sem.} & \textbf{Actividad} & \textbf{Responsable} & \textbf{Fase} \\
+\midrule
+1  & Formulación del problema y pregunta & Karol L / Juanita R & 1 \\
+2  & Comparación y selección del conjunto de datos & Juanita L / Karol R & 1 \\
+3  & Ficha del dataset y procedimiento de descarga & Juanita L / Karol R & 1 \\
+4  & Descarga, verificación y caracterización & Juanita L / Karol R & 1 \\
+5  & Píxeles, conectividad, regiones; cierre Fase 1 & Juanita L / Karol R & 1 \\
+\addlinespace
+6  & Intensidad, normalización y transformaciones & Karol L / Juanita R & 2 \\
+7  & Vecindad: filtros de ruido y operadores de borde & Juanita L / Karol R & 2 \\
+8  & Histogramas, ecualización y especificación & Karol L / Juanita R & 2 \\
+9  & Umbralización y morfología contra referencia & Karol L / Juanita R & 2 \\
+10 & Dominio de frecuencia y CWT sobre perfil 1D & Juanita L / Karol R & 2 \\
+11 & DWT 2D, energía por subbanda; cierre Fase 2 & Karol L / Juanita R & 2 \\
+\addlinespace
+12 & Reconstrucción del flujo desde \texttt{data/raw/} & Juanita L / Karol R & 3 \\
+13 & Descriptores y error relativo frente a referencia & Juanita L / Karol R & 3 \\
+14 & Análisis estadístico y de sensibilidad & Juanita L / Karol R & 3 \\
+15 & Regeneración limpia, informe y Laboratorio 03 & Karol L / Juanita R & 3 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Reparto de responsabilidades}
+
+Cada bloque técnico tiene una integrante que lo lidera y otra que lo revisa,
+alternándose entre bloques. La revisión no es un trámite: la revisora ejecuta el
+código y debe poder explicar cada decisión tomada. El propósito es que ninguna
+parte del proyecto dependa del conocimiento de una sola persona. Adicionalmente,
+Juanita mantiene la infraestructura reproducible (repositorio, entorno,
+\texttt{scripts/check\_dataset.py} y \texttt{scripts/reproduce.py}) y Karol
+mantiene el documento y la coherencia entre resultados y narrativa.
+
+\subsection{Riesgos y mitigación}
+
+\begin{table}[H]
+\centering
+\caption{Riesgos identificados, indicadores tempranos y respuesta prevista.}
+\scriptsize
+\begin{tabular}{@{}p{2.5cm}cp{1.1cm}p{3.2cm}p{4.5cm}@{}}
+\toprule
+\textbf{Riesgo} & \textbf{Prob.} & \textbf{Impacto} & \textbf{Indicador temprano} & \textbf{Mitigación} \\
+\midrule
+Conjunto de datos no descargable &
+Baja & Alto &
+El índice del servidor de la NLM no responde o cambian las rutas en la semana 3 &
+Ambos conjuntos existen en réplicas independientes (Internet Archive y el conjunto combinado de Mendeley con DOI 10.17632/8gf9vpkhgy.2). Se descarga en la semana 3, no en la 4, para dejar margen de reacción \\
+\addlinespace
+Máscaras de Shenzhen inaccesibles &
+Media & Alto &
+El repositorio de Kaggle deja de estar disponible o cambia de licencia &
+El mismo conjunto de máscaras está en Mendeley con DOI versionado. Si ninguna fuente está disponible, OE3 y OE4 se restringen a Montgomery y se declara el cambio de alcance en el informe \\
+\addlinespace
+Metadatos insuficientes para definir la unidad de análisis &
+Alta & Medio &
+Las lecturas clínicas no contienen identificador de paciente, confirmado en la semana 4 &
+Se declara explícitamente el supuesto de una imagen por sujeto, se documenta como limitación y no se aplica ningún procedimiento que requiera partición por paciente \\
+\addlinespace
+Tamaño computacional excesivo &
+Media & Medio &
+El procesamiento de una imagen de Montgomery a resolución plena supera el tiempo o la memoria disponible en la semana 6 &
+La Fase 1 incluye submuestreo controlado para fijar una resolución de trabajo que no altere los descriptores. La Fase 2 opera primero sobre muestra estratificada. El procesamiento es imagen por imagen, nunca cargando el conjunto completo \\
+\addlinespace
+Discrepancia entre las máscaras de referencia de los dos orígenes &
+Alta & Alto &
+El Dice de una misma estrategia difiere sistemáticamente entre orígenes en la semana 9 &
+Toda métrica se reporta estratificada por sitio desde el comienzo. El criterio de éxito exige consistencia en ambos orígenes, no un promedio agregado. La diferencia de convención de trazado está declarada como limitación principal \\
+\addlinespace
+Ninguna estrategia supera la línea base &
+Media & Medio &
+Los errores relativos de la semana 13 no mejoran respecto al procesamiento nulo &
+Es un resultado válido y se reporta como tal. La pregunta indaga en qué medida las estrategias modifican la estabilidad, no presupone que la mejoren. El análisis de sensibilidad documenta el rango de parámetros explorado \\
+\addlinespace
+Retraso acumulado en la Fase 2 &
+Media & Alto &
+El cierre de la semana 11 llega sin las métricas de wavelets &
+Las técnicas marcadas como experimento controlado (emboss, top-hat, pasa-banda) se ejecutan con parámetros únicos y sin barrido, o se documentan como no ejecutadas con la razón. Los bloques del flujo principal tienen prioridad \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+
+\section{Estructura reproducible}
+
+El proyecto se administra con \texttt{uv}. Las dependencias se declaran en
+\texttt{pyproject.toml} y sus versiones exactas quedan fijadas en
+\texttt{uv.lock}. El entorno virtual no se versiona. La reconstrucción completa
+desde un repositorio limpio requiere Python 3.12 y un solo comando:
+
+\begin{verbatim}
+uv sync --locked
+\end{verbatim}
+
+\subsection{Dependencias}
+
+Se declaran siete bibliotecas de análisis: \texttt{numpy}, \texttt{scipy},
+\texttt{matplotlib}, \texttt{pandas}, \texttt{scikit-image}, \texttt{pywavelets}
+y \texttt{statsmodels}; más \texttt{pytest} y \texttt{ruff} como dependencias de
+desarrollo. No se instala ningún paquete con \texttt{pip} dentro del entorno del
+proyecto.
+
+La guía del curso incluye \texttt{opencv-python} en su comando de ejemplo. Este
+proyecto no lo declara. La razón es que las 53 técnicas de la matriz de
+cobertura son realizables con \texttt{scikit-image} y \texttt{scipy}: la
+ecualización adaptativa, el umbral de Otsu, el umbral adaptativo local, las
+operaciones morfológicas incluidas top-hat y black-hat, y los operadores de
+Sobel, Prewitt, Roberts y Laplaciano están disponibles en esas dos bibliotecas.
+El filtro de Butterworth se construye directamente sobre la transformada de
+Fourier de \texttt{scipy}, lo que además hace explícito el diseño del filtro en
+lugar de delegarlo. Agregar una dependencia sin uso concreto en el diseño
+metodológico contradice la advertencia de la propia guía, de modo que la omisión
+es deliberada y queda documentada aquí y en el \texttt{README.md}.
+
+\subsection{Estructura de carpetas}
+
+\begin{verbatim}
+psim-proyecto/
+|-- .python-version        Python 3.12
+|-- .gitignore
+|-- README.md              Protocolo de reconstruccion
+|-- pyproject.toml         Dependencias declaradas
+|-- uv.lock                Versiones fijadas
+|-- data/
+|   |-- raw/               Datos originales, no versionados
+|   |   \-- README.md      Descarga y verificacion
+|   \-- processed/         Datos derivados, regenerables
+|-- docs/                  Informe, ficha, matriz y cronograma
+|-- figures/fase1..3/      Figuras por fase
+|-- results/fase1..3/      Tablas y metricas por fase
+|-- scripts/
+|   |-- check_dataset.py   Verificacion de integridad
+|   \-- reproduce.py       Reconstruccion completa
+|-- src/psim/              Codigo reusable
+\-- tests/
+\end{verbatim}
+
+El código reusable vive en \texttt{src/psim/} y se separa de los guiones de
+ejecución en \texttt{scripts/}. Todas las rutas se construyen con
+\texttt{pathlib} y son relativas a la raíz del proyecto, de modo que el código
+funciona en Windows, Linux y macOS sin modificación.
+
+\subsection{Política de datos}
+
+Los datos originales son de solo lectura. Nada de lo que hay bajo
+\texttt{data/raw/} se sobrescribe. Todo cambio de tamaño, intensidad, formato,
+región de interés, filtro o máscara produce un dato derivado en
+\texttt{data/processed/} o un resultado regenerable en \texttt{results/} y
+\texttt{figures/}.
+
+Las condiciones de uso de ambos conjuntos incluyen no redistribuirlos fuera del
+grupo de investigación, por lo que las imágenes no se versionan. En su lugar,
+\texttt{data/raw/README.md} documenta de dónde se obtienen, qué versión usar, qué
+archivos descargar y cómo verificar que la copia corresponde al conjunto descrito
+en la propuesta.
+
+\subsection{Verificación de integridad}
+
+El guion \texttt{scripts/check\_dataset.py} comprueba que las siete colecciones
+de datos existan con los conteos esperados, verifica el tamaño total contra las
+cifras registradas en el índice del servidor de la NLM, calcula el hash SHA-256
+de cada archivo y escribe \texttt{results/fase1/manifiesto\_datos.csv}. Ese
+manifiesto es el único producto derivado que se versiona: permite comprobar que
+dos copias del conjunto son idénticas sin redistribuir las imágenes. Si algún
+conteo o tamaño no coincide, el guion no escribe el manifiesto y explica qué
+falta.
+
+\subsection{Reproducción del proyecto}
+
+El guion \texttt{scripts/reproduce.py} regenera todos los productos derivados a
+partir de \texttt{data/raw/}. Ninguna tabla ni figura del informe se edita a
+mano: todas se producen desde el código y se escriben en \texttt{results/} y
+\texttt{figures/}. La secuencia completa de verificación es:
+
+\begin{verbatim}
+uv sync --locked
+uv run ruff check src/ scripts/
+uv run pytest
+uv run python scripts/check_dataset.py
+uv run python scripts/reproduce.py
+\end{verbatim}
+
+
+
+% Bibliografía
+\bibliographystyle{plain}
+\bibliography{referencias}
+
+\end{document}

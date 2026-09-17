@@ -1,0 +1,83 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+.venv
+env/
+venv/
+ENV/
+.uv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Project-specific
+data/raw/Montgomery/*
+data/raw/Shenzhen/*
+!data/raw/README.md
+# Datos derivados: se ignora el contenido, se conserva la estructura
+data/processed/*
+!data/processed/.gitkeep
+
+# Resultados y figuras: regenerables, salvo el manifiesto de datos
+results/*
+!results/fase1/
+results/fase1/*
+!results/fase2/
+results/fase2/*
+!results/fase3/
+results/fase3/*
+!results/fase1/.gitkeep
+!results/fase2/.gitkeep
+!results/fase3/.gitkeep
+!results/fase1/manifiesto_datos.csv
+
+figures/*
+!figures/fase1/
+figures/fase1/*
+!figures/fase2/
+figures/fase2/*
+!figures/fase3/
+figures/fase3/*
+!figures/fase1/.gitkeep
+!figures/fase2/.gitkeep
+!figures/fase3/.gitkeep
+
+*.log
+
+# Jupyter
+.ipynb_checkpoints/
+
+# LaTeX
+*.aux
+*.toc
+*.bbl
+*.blg
+*.out
+*.fls
+*.fdb_latexmk
+*.synctex.gz

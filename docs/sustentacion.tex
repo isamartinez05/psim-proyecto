@@ -1,0 +1,109 @@
+% Sustentación del Proyecto Semestral — PSIM
+% Basado en la plantilla del curso (PlantillaPresentacion.tex)
+% -------------------------------------------------------------
+% Requiere en el mismo directorio: Escuela_Rosario_logo.png
+% -------------------------------------------------------------
+
+\documentclass[12pt]{beamer}
+
+% Tema y colores
+\usetheme{Madrid}
+\usecolortheme{beaver}
+
+% Paquetes básicos
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish]{babel}
+\usepackage{lmodern}
+\usepackage{graphicx}
+
+\newcommand{\tituloTrabajo}{Estabilidad de los descriptores morfológicos del campo pulmonar}
+\newcommand{\acronimoTrabajo}{EDMP-2026II}
+\newcommand{\autorA}{Juanita Trujillo Narváez}
+\newcommand{\autorB}{Karol Isabella Martínez Villarreal}
+\newcommand{\carrera}{Ingeniería Biomédica}
+\newcommand{\codigoEstudianteA}{1000099467}
+\newcommand{\codigoEstudianteB}{1000099682}
+\newcommand{\cursoCodigo}{PSIM - 2026II - 80}
+\newcommand{\cursoNombre}{Procesamiento de Señales e Imágenes Médicas}
+\newcommand{\docente}{Ing. Pablo Eduardo Caicedo-Rodríguez. Ph.D.}
+\newcommand{\fechaEntrega}{\today}
+
+% ----------------------------------
+% Datos de la presentación
+\title[\acronimoTrabajo]{\tituloTrabajo}
+\subtitle{\cursoNombre}
+\author[\cursoNombre]{\autorA \\ \autorB}
+\institute[]{\carrera\\Docente: \docente}
+\date{\fechaEntrega}
+% ----------------------------------
+
+% Logo en todas las diapositivas
+\logo{\includegraphics[height=1cm]{Escuela_Rosario_logo.png}}
+
+\begin{document}
+
+% Portada
+\begin{frame}[plain]
+    \titlepage
+\end{frame}
+
+% Índice
+\begin{frame}{Índice}
+    \tableofcontents
+\end{frame}
+
+% Sección 1
+\section{Problema}
+\begin{frame}{Problema}
+    \begin{itemize}
+        \item La delimitación del campo pulmonar precede a toda medición cuantitativa.
+        \item Su estabilidad depende del detector, la exposición y los hallazgos del parénquima.
+        \item Si la máscara se desplaza, los descriptores morfológicos heredan esa variabilidad.
+    \end{itemize}
+\end{frame}
+
+% Sección 2
+\section{Pregunta y objetivos}
+\begin{frame}{Pregunta de investigación}
+    \begin{block}{}
+        ¿En qué medida las estrategias de realce, umbralización y morfología
+        modifican la estabilidad de los descriptores morfológicos del campo
+        pulmonar respecto a la máscara de referencia?
+    \end{block}
+\end{frame}
+
+\begin{frame}{Objetivos específicos}
+    \begin{enumerate}
+        \item Caracterizar digitalización y adquisición de ambos conjuntos.
+        \item Comparar estrategias de normalización y reducción de ruido.
+        \item Comparar estrategias de segmentación contra las máscaras de referencia.
+        \item Cuantificar el desplazamiento de cada descriptor.
+        \item Analizar diferencias entre grupos y documentar limitaciones.
+    \end{enumerate}
+\end{frame}
+
+% Sección 3
+\section{Datos y métodos}
+\begin{frame}{Conjunto de datos}
+    \begin{itemize}
+        \item Montgomery County CXR Set y Shenzhen Hospital CXR Set (NLM).
+        \item 800 imágenes; 704 con máscara de referencia.
+        \item Dos tecnologías de detector, dos profundidades de bits.
+    \end{itemize}
+\end{frame}
+
+% Sección 4
+\section{Cronograma}
+\begin{frame}{Cronograma}
+    % TODO: resumen de las tres fases
+\end{frame}
+
+% Diapositiva final
+\begin{frame}[plain]
+    \centering
+    \Huge ¡Gracias por su atención!\\[1cm]
+    \small Preguntas y comentarios.
+\end{frame}
+
+\end{document}

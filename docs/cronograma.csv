@@ -1,0 +1,16 @@
+﻿semana,fase,actividad,dependencia,responsable,evidencia,estado
+1,1,Formulacion inicial del problema y pregunta de investigacion,ninguna,Karol (lider) / Juanita (revision),docs/formulacion_proyecto.tex,completado
+2,1,Busqueda comparacion y seleccion del conjunto de datos,pregunta preliminar,Juanita (lider) / Karol (revision),docs/datasets_candidatos.csv,completado
+3,1,Ficha del conjunto de datos y procedimiento reproducible de descarga,dataset seleccionado,Juanita (lider) / Karol (revision),docs/dataset_card.md y data/raw/README.md,en_curso
+4,1,Descarga verificacion de integridad y caracterizacion de digitalizacion,procedimiento de descarga escrito,Juanita (lider) / Karol (revision),scripts/check_dataset.py y results/fase1/caracterizacion.csv,planeado
+5,1,Analisis de pixeles vecindad conectividad y regiones e histogramas iniciales; cierre de Fase 1,caracterizacion completada,Juanita (lider) / Karol (revision),src/psim/geometry.py y figures/fase1/,planeado
+6,2,Espacios de intensidad normalizacion y transformaciones puntuales,Fase 1 cerrada,Karol (lider) / Juanita (revision),src/psim/color.py y figures/fase2/transformaciones_intensidad.png,planeado
+7,2,Operaciones de vecindad filtros de ruido y operadores de borde,imagenes normalizadas,Juanita (lider) / Karol (revision),src/psim/spatial.py y figures/fase2/bordes_comparacion.png,planeado
+8,2,Histogramas ecualizacion CLAHE y especificacion entre origenes,filtros seleccionados,Karol (lider) / Juanita (revision),src/psim/histogram.py y figures/fase2/realce_comparacion.png,planeado
+9,2,Umbralizacion y morfologia; evaluacion contra mascaras de referencia,realce seleccionado,Karol (lider) / Juanita (revision),src/psim/segmentation.py y results/fase2/dice_por_estrategia.csv,planeado
+10,2,Dominio de frecuencia y transformada wavelet continua sobre perfil 1D,imagenes preparadas,Juanita (lider) / Karol (revision),src/psim/frequency.py y figures/fase2/espectros.png,planeado
+11,2,Descomposicion wavelet 2D energia por subbanda y cierre de Fase 2,segmentacion seleccionada,Karol (lider) / Juanita (revision),src/psim/wavelets.py y results/fase2/metricas_realce.csv,planeado
+12,3,Reconstruccion del flujo completo desde data/raw con las estrategias justificadas,Fase 2 cerrada,Juanita (lider) / Karol (revision),scripts/reproduce.py,planeado
+13,3,Extraccion de descriptores y calculo del error relativo frente a la referencia,flujo reconstruido,Juanita (lider) / Karol (revision),results/fase3/tabla_caracteristicas.csv,planeado
+14,3,Analisis estadistico prueba de hipotesis y analisis de sensibilidad,tabla de caracteristicas final,Juanita (lider) / Karol (revision),results/fase3/analisis_estadistico.csv,planeado
+15,3,Regeneracion limpia desde cero informe final y presentacion en el Laboratorio 03,proyecto completo,Karol (lider) / Juanita (revision),docs/formulacion_proyecto.pdf y docs/sustentacion.pdf,planeado
