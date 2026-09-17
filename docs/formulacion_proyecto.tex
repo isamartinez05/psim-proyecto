@@ -95,9 +95,10 @@
     morfológicos del campo pulmonar en radiografías de tórax posteroanteriores
     frente a distintas estrategias de preprocesamiento y segmentación, se
     plantea la pregunta de investigación y los objetivos asociados, se documenta
-    la selección del conjunto de datos entre tres candidatos evaluados, se traza
-    la cobertura de los bloques técnicos de la asignatura y se describe la
-    estructura reproducible del proyecto.
+    la selección del conjunto de datos entre cuatro candidatos evaluados, se traza
+    la cobertura de los bloques técnicos de la asignatura, se define el cronograma
+    de quince semanas con sus riesgos y mitigaciones, y se describe la estructura
+    reproducible del proyecto.
 \end{abstract}
 
 \newpage
@@ -106,7 +107,7 @@
 
 La radiografía de tórax posteroanterior es una de las modalidades de imagen más
 prescritas en la práctica clínica. Cada píxel de la imagen representa la
-atenuación acumulada que sufre un haz de rayos X al atravesar el tórax, de modo
+atenuación acumulada que sufre un haz de rayos X al atravesar el tórax~\cite{prince2015}, de modo
 que la imagen es una proyección bidimensional de un volumen tridimensional: el
 aire contenido en el parénquima pulmonar atenúa poco y se registra oscuro,
 mientras que el hueso y el mediastino atenúan considerablemente y se registran
@@ -117,7 +118,7 @@ cualquier medición cuantitativa. Esa delimitación es inestable porque el
 contraste entre el pulmón y las estructuras vecinas depende de la tecnología del
 detector, de los parámetros de exposición y de la presencia de hallazgos que
 opacifican el parénquima. Los conjuntos públicos de la National Library of
-Medicine hacen visible el problema: las imágenes de Montgomery se adquirieron con
+Medicine~\cite{jaeger2014} hacen visible el problema: las imágenes de Montgomery se adquirieron con
 radiografía computarizada en doce bits, mientras que las de Shenzhen provienen de
 radiografía digital directa en ocho bits, con resolución variable y codificación
 de escala invertida.
@@ -143,10 +144,11 @@ radiográficas.
 
 \subsection{Mapa causal-operativo}
 
-El esquema siguiente diferencia las siete etapas que exige la guía, con las
-variables reales del proyecto en lugar de nombres genéricos. La cadena operativa
-va de arriba hacia abajo; los factores de confusión técnicos actúan lateralmente
-sobre las etapas que se indican.
+El esquema siguiente diferencia los siete elementos que exige la guía: las seis
+etapas de la cadena operativa, de la imagen original al resultado cuantitativo, y
+los factores de confusión técnicos que actúan sobre ellas. La cadena aparece en la
+figura y los factores en la tabla que la sigue, con las variables reales del
+proyecto en lugar de nombres genéricos.
 
 \begin{figure}[H]
 \centering
@@ -182,9 +184,7 @@ Compacidad, relación de aspecto, fracción de área, simetría izquierda-derech
 Error relativo de cada descriptor frente al obtenido sobre la máscara de referencia, estratificado por origen \\
 \hline
 \end{tabular}
-\caption{Mapa causal-operativo del proyecto. La cadena va de la imagen original
-al resultado cuantitativo; los factores de confusión de la Tabla siguiente actúan
-sobre las etapas indicadas.}
+\caption{Mapa causal-operativo del proyecto.}
 \end{figure}
 
 \begin{table}[H]
@@ -275,11 +275,12 @@ morfológicas reproducibles entre sitios de adquisición.
 \centering
 \caption{Trazabilidad de los objetivos específicos a fase, producto y criterio.}
 \small
-\begin{tabular}{@{}p{0.8cm}p{1.1cm}p{5.2cm}p{5.2cm}@{}}
+\footnotesize
+\begin{tabular}{@{}p{0.7cm}p{0.9cm}p{5.8cm}p{4.9cm}@{}}
 \toprule
 \textbf{OE} & \textbf{Fase} & \textbf{Producto verificable} & \textbf{Criterio de cumplimiento} \\
 \midrule
-OE1 & 1 & \texttt{docs/dataset\_card.md}, \texttt{results/fase1/ caracterizacion.csv}, \texttt{figures/fase1/histogramas.png} & Las 800 imágenes con dimensiones, profundidad, canales y estadísticos registrados; identificadas y corregidas las de escala invertida \\
+OE1 & 1 & \texttt{docs/dataset\_card.md}, \texttt{results/fase1/ caracterizacion.csv}, \texttt{figures/fase1/ histogramas.png} & Las 800 imágenes con dimensiones, profundidad, canales y estadísticos registrados; identificadas y corregidas las de escala invertida \\
 \addlinespace
 OE2 & 1--2 & \texttt{results/fase2/ metricas\_realce.csv}, \texttt{figures/fase2/ realce\_comparacion.png}, \texttt{figures/fase2/espectros.png} & Cada estrategia con contraste RMS, desviación estándar del fondo y conservación de bordes; se conservan solo las que mejoran al menos una métrica sin degradar las otras \\
 \addlinespace
@@ -314,11 +315,11 @@ Métrica principal & Error relativo de cada descriptor respecto a su valor de re
 \addlinespace
 Métricas secundarias & Coeficiente Dice, índice de Jaccard, contraste RMS, desviación estándar del fondo, conservación de bordes \\
 \addlinespace
-Unidad de análisis & La imagen, que corresponde a un sujeto (a confirmar en Fase 1) \\
+Unidad de análisis & La imagen. Ninguno de los conjuntos incluye identificador de paciente, de modo que la equivalencia entre imagen y sujeto es un supuesto que debe verificarse en Fase 1. Los objetivos OE3 y OE4 operan sobre el subconjunto de 704 imágenes con máscara, estratificado por origen \\
 \addlinespace
 Criterio de éxito técnico & Identificar al menos una combinación cuyo error relativo mediano sea menor que el de la línea base sin preprocesamiento, en al menos tres de los cinco descriptores, de forma consistente en ambos orígenes \\
 \addlinespace
-Limitación esperada & Las máscaras de referencia provienen de dos procedencias con convenciones posiblemente distintas, lo que puede sesgar la comparación entre orígenes \\
+Limitación esperada & Las máscaras de referencia provienen de dos procedencias con convenciones distintas: las de Montgomery excluyen corazón y grandes vasos y las de Shenzhen los delimitan, lo que sesga sistemáticamente la comparación entre orígenes \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -380,13 +381,13 @@ determinar qué combinación produce mediciones reproducibles \emph{entre} sitio
 Un candidato con buen puntaje agregado que no puede responder la pregunta no es un
 candidato viable.
 
-JSRT se descarta pese a tener las máscaras más completas del grupo, que incluyen
+JSRT~\cite{shiraishi2000,vanginneken2006} se descarta pese a tener las máscaras más completas del grupo, que incluyen
 pulmones, corazón y clavículas y habrían permitido calcular la relación
 cardiotorácica. El acceso requiere solicitud y aprobación, y el cronograma de quince
 semanas no admite depender de un tiempo de respuesta que no controlamos. Es un
 descarte por riesgo de ejecución, no por calidad del conjunto.
 
-CheXmask se descarta por una razón metodológica que ningún puntaje compensa. Sus
+CheXmask~\cite{gaggion2024} se descarta por una razón metodológica que ningún puntaje compensa. Sus
 máscaras fueron generadas por un modelo de aprendizaje profundo, no trazadas por
 personas. Usarlas como referencia invalidaría el criterio de comparación del
 proyecto, que consiste precisamente en medir cuánto se aleja una segmentación
@@ -429,7 +430,8 @@ pregunta de investigación.
 \centering
 \caption{Productos esperados de la Fase 1 y su ubicación en el repositorio.}
 \small
-\begin{tabular}{@{}p{6.3cm}p{7.2cm}@{}}
+\footnotesize
+\begin{tabular}{@{}p{5.6cm}p{7.9cm}@{}}
 \toprule
 \textbf{Producto esperado} & \textbf{Ubicación} \\
 \midrule
@@ -439,7 +441,7 @@ Procedimiento reproducible de descarga & \texttt{data/raw/README.md} y \texttt{s
 Inspección de formato, dimensiones, rango y metadatos & \texttt{results/fase1/caracterizacion.csv} \\
 Análisis de muestreo, cuantización, resolución espacial e intensidad & \texttt{figures/fase1/submuestreo.png}, \texttt{figures/fase1/requantizacion.png}, \texttt{figures/fase1/rango\_intensidad.png} \\
 Caracterización de píxeles, vecindades, conectividad y regiones & \texttt{src/psim/geometry.py}, \texttt{figures/fase1/conectividad.png}, \texttt{figures/fase1/distancia\_borde.png} \\
-Estadísticas básicas e histogramas iniciales & \texttt{figures/fase1/histogramas.png}, \texttt{figures/fase1/histogramas\_comparados.png} \\
+Estadísticas básicas e histogramas iniciales & \texttt{figures/fase1/ histogramas.png}, \texttt{figures/fase1/ histogramas\_comparados.png} \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -476,7 +478,7 @@ una consecuencia concreta sobre las fases siguientes.
     que esa reducción no altera los descriptores.
 
     \item \textbf{Convención de trazado de la máscara de referencia.} Las máscaras
-    de Montgomery excluyen corazón y grandes vasos; las de Shenzhen los delimitan.
+    de Montgomery excluyen corazón y grandes vasos~\cite{candemir2014}; las de Shenzhen los delimitan~\cite{stirenko2018}.
     Es un sesgo sistemático entre orígenes que no puede corregirse y que se declara
     como la principal limitación del estudio.
 
@@ -489,7 +491,7 @@ una consecuencia concreta sobre las fases siguientes.
 \subsection{Fase 2 — Procesamiento y extracción de características}
 
 La Fase 2 implementa de forma reproducible los bloques de intensidad, vecindad,
-histogramas, bordes, umbralización, morfología, dominio de frecuencia y wavelets
+histogramas, bordes, umbralización, morfología, dominio de frecuencia y wavelets~\cite{dougherty2009}
 definidos en la matriz de técnicas. Ninguna comparación se resuelve por apariencia:
 cada una se decide con una de las métricas definidas a continuación, fijadas antes
 de ejecutar el procesamiento.
@@ -854,6 +856,7 @@ uv run python scripts/reproduce.py
 
 
 % Bibliografía
+\nocite{*}
 \bibliographystyle{plain}
 \bibliography{referencias}
 
