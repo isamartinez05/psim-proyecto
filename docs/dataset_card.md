@@ -1,4 +1,4 @@
-﻿# Dataset card
+# Dataset card
 
 Este proyecto utiliza dos conjuntos complementarios publicados por la U.S. National
 Library of Medicine. Se documentan juntos porque constituyen la población de estudio

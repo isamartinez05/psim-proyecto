@@ -1,4 +1,4 @@
-﻿semana,fase,actividad,dependencia,responsable,evidencia,estado
+semana,fase,actividad,dependencia,responsable,evidencia,estado
 1,1,Formulacion inicial del problema y pregunta de investigacion,ninguna,Karol (lider) / Juanita (revision),docs/formulacion_proyecto.tex,completado
 2,1,Busqueda comparacion y seleccion del conjunto de datos,pregunta preliminar,Juanita (lider) / Karol (revision),docs/datasets_candidatos.csv,completado
 3,1,Ficha del conjunto de datos y procedimiento reproducible de descarga,dataset seleccionado,Juanita (lider) / Karol (revision),docs/dataset_card.md y data/raw/README.md,en_curso

@@ -1,4 +1,4 @@
-﻿# Estabilidad de los descriptores morfológicos del campo pulmonar
+# Estabilidad de los descriptores morfológicos del campo pulmonar
 
 Proyecto semestral de Procesamiento de Señales e Imágenes Médicas (PSIM - 2026II - 80).
 

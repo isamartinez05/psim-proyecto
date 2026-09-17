@@ -1,4 +1,4 @@
-﻿[project]
+[project]
 name = "psim-proyecto"
 version = "0.1.0"
 description = "Estabilidad de los descriptores morfologicos del campo pulmonar frente a estrategias de preprocesamiento y segmentacion en radiografias de torax"

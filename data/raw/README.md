@@ -1,4 +1,4 @@
-﻿# data/raw/ — Datos originales
+# data/raw/ — Datos originales
 
 Los datos originales **no se redistribuyen en este repositorio** y **no se
 modifican nunca**. Este archivo documenta cómo obtenerlos y cómo verificar que la

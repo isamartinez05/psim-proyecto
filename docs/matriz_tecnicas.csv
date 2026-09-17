@@ -1,4 +1,4 @@
-﻿bloque,tecnica,fase,entrada,parametros,producto,metrica,decision_esperada,archivo_codigo,figura_o_tabla,estado
+bloque,tecnica,fase,entrada,parametros,producto,metrica,decision_esperada,archivo_codigo,figura_o_tabla,estado
 Representacion y digitalizacion,Inspeccion de formato y metadatos,1,imagen_raw,ninguno,tabla_metadatos,dimensiones_bits_canales_por_imagen,documentar_sin_descarte,src/psim/io.py,results/fase1/caracterizacion.csv,planeado
 Representacion y digitalizacion,Verificacion de resolucion espacial y muestreo,1,tabla_metadatos,ninguno,tabla_resolucion,dispersion_de_dimensiones_por_origen,documentar_y_definir_tamano_de_trabajo_comun,src/psim/io.py,results/fase1/caracterizacion.csv,planeado
 Representacion y digitalizacion,Analisis de cuantizacion y resolucion de intensidad,1,imagen_gris,ninguno,tabla_rango_intensidad,numero_de_niveles_ocupados_y_rango_efectivo,documentar_diferencia_12_vs_8_bits,src/psim/io.py,figures/fase1/rango_intensidad.png,planeado

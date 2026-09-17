@@ -1,4 +1,4 @@
-﻿"""Reconstruye todos los productos derivados desde data/raw/.
+"""Reconstruye todos los productos derivados desde data/raw/.
 
 Este script es el protocolo de reproduccion del proyecto. Ejecuta las tres
 fases en orden, regenerando todo lo que hay en data/processed/, results/ y
