@@ -81,3 +81,14 @@ figures/fase3/*
 *.fls
 *.fdb_latexmk
 *.synctex.gz
+
+# Los PDF compilados son entregables, aunque sean regenerables
+!build/reports/informe.pdf
+!build/slides/presentacion.pdf
+
+# Los PDF compilados son entregables
+!build/
+!build/reports/
+!build/reports/informe.pdf
+!build/slides/
+!build/slides/presentacion.pdf
