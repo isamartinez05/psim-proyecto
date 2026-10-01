@@ -1,0 +1,41 @@
+{
+  "unidad_de_analisis": "imagen procesada bajo una estrategia",
+  "clave": "sample_id",
+  "columna_de_agrupacion": "image_id",
+  "predictores": [
+    "compacidad",
+    "relacion_aspecto",
+    "fraccion_area",
+    "simetria_izq_der",
+    "energia_wavelet_d1"
+  ],
+  "columna_objetivo": null,
+  "nota_objetivo": "El proyecto es de segmentacion clasica y comparacion de estabilidad. La salida espacial es la mascara vinculada, no una etiqueta por fila. La columna target existe como variable de control para el analisis entre grupos del objetivo cinco, no como objetivo supervisado.",
+  "columnas_excluidas_de_predictor": [
+    "ref_compacidad",
+    "err_compacidad",
+    "ref_relacion_aspecto",
+    "err_relacion_aspecto",
+    "ref_fraccion_area",
+    "err_fraccion_area",
+    "ref_simetria_izq_der",
+    "err_simetria_izq_der",
+    "ref_energia_wavelet_d1",
+    "err_energia_wavelet_d1",
+    "dice",
+    "jaccard",
+    "target"
+  ],
+  "razon_exclusion": "Las columnas ref_ y err_ y las metricas de solapamiento derivan de la mascara de referencia, que no existe al procesar una imagen nueva.",
+  "estrategia_de_validacion": "agrupada por image_id; particion congelada en splits.csv",
+  "metricas_previstas": [
+    "dice",
+    "jaccard",
+    "error relativo por descriptor"
+  ],
+  "linea_base": [
+    "base_fijo",
+    "base_otsu",
+    "base_adap"
+  ]
+}

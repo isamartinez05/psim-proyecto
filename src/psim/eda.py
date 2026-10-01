@@ -106,14 +106,25 @@ def seleccionar_galeria(d: pd.DataFrame, semilla: int = SEMILLA_GALERIA) -> list
 
     es_mc = d["dataset_id"].str.endswith("MontgomeryCXRSet")
 
-    tomar(d[es_mc & (d["target"] == "0")], 2, "clase_y_origen", "Montgomery sin hallazgos")
-    tomar(d[es_mc & (d["target"] == "1")], 2, "clase_y_origen", "Montgomery con hallazgos")
-    tomar(d[~es_mc & (d["target"] == "0")], 2, "clase_y_origen", "Shenzhen sin hallazgos")
-    tomar(d[~es_mc & (d["target"] == "1")], 2, "clase_y_origen", "Shenzhen con hallazgos")
+    tomar(
+        d[es_mc & (d["target"] == "0")], 2, "clase_y_origen", "Montgomery sin hallazgos"
+    )
+    tomar(
+        d[es_mc & (d["target"] == "1")], 2, "clase_y_origen", "Montgomery con hallazgos"
+    )
+    tomar(
+        d[~es_mc & (d["target"] == "0")], 2, "clase_y_origen", "Shenzhen sin hallazgos"
+    )
+    tomar(
+        d[~es_mc & (d["target"] == "1")], 2, "clase_y_origen", "Shenzhen con hallazgos"
+    )
 
     # Extremos de resolución: la imagen con menos y con más píxeles.
     pixeles = d["height"] * d["width"]
-    for idx, nota in [(pixeles.idxmin(), "menor resolucion"), (pixeles.idxmax(), "mayor resolucion")]:
+    for idx, nota in [
+        (pixeles.idxmin(), "menor resolucion"),
+        (pixeles.idxmax(), "mayor resolucion"),
+    ]:
         iid = d.loc[idx, "image_id"]
         if iid not in usados:
             usados.add(iid)
@@ -122,7 +133,12 @@ def seleccionar_galeria(d: pd.DataFrame, semilla: int = SEMILLA_GALERIA) -> list
     edad = pd.to_numeric(d["edad"], errors="coerce")
     tomar(d[edad < 2], 1, "pediatrico", "paciente menor de dos anos")
 
-    tomar(d[d["quality_status"] == "revisar"], 1, "requiere_revision", "marcado en el inventario")
+    tomar(
+        d[d["quality_status"] == "revisar"],
+        1,
+        "requiere_revision",
+        "marcado en el inventario",
+    )
 
     return elegidos
 
@@ -179,7 +195,9 @@ def figura_dimensiones(d: pd.DataFrame, destino: Path) -> None:
     grupos = [("Montgomery", d[es_mc], AZUL), ("Shenzhen", d[~es_mc], ROSA)]
 
     for nombre, sub, color in grupos:
-        ejes[0].scatter(sub["width"], sub["height"], s=9, alpha=0.45, color=color, label=nombre)
+        ejes[0].scatter(
+            sub["width"], sub["height"], s=9, alpha=0.45, color=color, label=nombre
+        )
     ejes[0].set_xlabel("ancho (px)")
     ejes[0].set_ylabel("alto (px)")
     ejes[0].set_title(f"Dimensiones por origen (n={len(d)})", fontsize=10)
@@ -209,7 +227,9 @@ def figura_dimensiones(d: pd.DataFrame, destino: Path) -> None:
     plt.close(fig)
 
 
-def estadisticos_por_imagen(d: pd.DataFrame, muestra: int | None = None) -> pd.DataFrame:
+def estadisticos_por_imagen(
+    d: pd.DataFrame, muestra: int | None = None
+) -> pd.DataFrame:
     """Calcula mediana, IQR, media y desviación por imagen.
 
     Las estadísticas se calculan sobre la imagen completa en su escala de
@@ -222,17 +242,21 @@ def estadisticos_por_imagen(d: pd.DataFrame, muestra: int | None = None) -> pd.D
     for _, fila in filas.iterrows():
         img = leer_gris(DATA_RAW / fila["relative_path"]).astype(np.float64)
         q25, q50, q75 = np.percentile(img, [25, 50, 75])
-        salida.append({
-            "image_id": fila["image_id"],
-            "origen": "Montgomery" if fila["dataset_id"].endswith("MontgomeryCXRSet") else "Shenzhen",
-            "target": fila["target"],
-            "media": round(float(img.mean()), 3),
-            "desviacion": round(float(img.std(ddof=0)), 3),
-            "mediana": float(q50),
-            "iqr": float(q75 - q25),
-            "p25": float(q25),
-            "p75": float(q75),
-        })
+        salida.append(
+            {
+                "image_id": fila["image_id"],
+                "origen": "Montgomery"
+                if fila["dataset_id"].endswith("MontgomeryCXRSet")
+                else "Shenzhen",
+                "target": fila["target"],
+                "media": round(float(img.mean()), 3),
+                "desviacion": round(float(img.std(ddof=0)), 3),
+                "mediana": float(q50),
+                "iqr": float(q75 - q25),
+                "p25": float(q25),
+                "p75": float(q75),
+            }
+        )
     return pd.DataFrame(salida)
 
 
@@ -253,10 +277,17 @@ def figura_intensidad(
     bordes = np.linspace(RANGO[0], RANGO[1] + 1, BINS + 1)
 
     es_mc = d["dataset_id"].str.endswith("MontgomeryCXRSet")
-    muestra = pd.concat([
-        d[es_mc].sample(min(n_histogramas // 2, int(es_mc.sum())), random_state=SEMILLA_GALERIA),
-        d[~es_mc].sample(min(n_histogramas // 2, int((~es_mc).sum())), random_state=SEMILLA_GALERIA),
-    ])
+    muestra = pd.concat(
+        [
+            d[es_mc].sample(
+                min(n_histogramas // 2, int(es_mc.sum())), random_state=SEMILLA_GALERIA
+            ),
+            d[~es_mc].sample(
+                min(n_histogramas // 2, int((~es_mc).sum())),
+                random_state=SEMILLA_GALERIA,
+            ),
+        ]
+    )
 
     for _, fila in muestra.iterrows():
         img = leer_gris(DATA_RAW / fila["relative_path"])
@@ -274,14 +305,21 @@ def figura_intensidad(
 
     for nombre, color in [("Montgomery", AZUL), ("Shenzhen", ROSA)]:
         sub = stats[stats["origen"] == nombre]
-        ejes[1].scatter(sub["mediana"], sub["iqr"], s=11, alpha=0.5, color=color, label=nombre)
+        ejes[1].scatter(
+            sub["mediana"], sub["iqr"], s=11, alpha=0.5, color=color, label=nombre
+        )
     ejes[1].set_xlabel("mediana de intensidad")
     ejes[1].set_ylabel("rango intercuartilico")
     ejes[1].set_title(f"Resumen por imagen (n={len(stats)})", fontsize=10)
     ejes[1].legend(fontsize=8)
 
-    datos = [stats[stats["origen"] == n]["mediana"].to_numpy() for n in ("Montgomery", "Shenzhen")]
-    bp = ejes[2].boxplot(datos, tick_labels=["Montgomery", "Shenzhen"], patch_artist=True)
+    datos = [
+        stats[stats["origen"] == n]["mediana"].to_numpy()
+        for n in ("Montgomery", "Shenzhen")
+    ]
+    bp = ejes[2].boxplot(
+        datos, tick_labels=["Montgomery", "Shenzhen"], patch_artist=True
+    )
     for parche, color in zip(bp["boxes"], [AZUL, ROSA], strict=False):
         parche.set_facecolor(color)
         parche.set_alpha(0.6)
@@ -302,12 +340,14 @@ def resumen_calidad(d: pd.DataFrame) -> pd.DataFrame:
             filas.append({"estado": estado, "razon": "", "n": len(sub), "ejemplos": ""})
             continue
         for razon, s2 in sub.groupby("quality_reason"):
-            filas.append({
-                "estado": estado,
-                "razon": razon,
-                "n": len(s2),
-                "ejemplos": ", ".join(sorted(s2["image_id"])[:3]),
-            })
+            filas.append(
+                {
+                    "estado": estado,
+                    "razon": razon,
+                    "n": len(s2),
+                    "ejemplos": ", ".join(sorted(s2["image_id"])[:3]),
+                }
+            )
     return pd.DataFrame(filas).sort_values(["estado", "n"], ascending=[True, False])
 
 
@@ -327,8 +367,11 @@ def ejecutar(manifiesto: Path, particion: Path) -> dict[str, object]:
     calidad = resumen_calidad(d)
     calidad.to_csv(resultado(2, "resumen_calidad.csv"), index=False)
 
-    pd.DataFrame([{"image_id": p.image_id, "criterio": p.criterio, "nota": p.nota} for p in paneles]).to_csv(
-        resultado(2, "galeria_seleccion.csv"), index=False
-    )
+    pd.DataFrame(
+        [
+            {"image_id": p.image_id, "criterio": p.criterio, "nota": p.nota}
+            for p in paneles
+        ]
+    ).to_csv(resultado(2, "galeria_seleccion.csv"), index=False)
 
     return {"n_train": len(d), "paneles": len(paneles), "stats": len(stats)}

@@ -105,7 +105,9 @@ def canales_son_identicos(imagen: NDArray[np.generic]) -> bool:
     if imagen.ndim != 3 or imagen.shape[2] < 2:
         return False
     primero = imagen[..., 0]
-    return all(np.array_equal(primero, imagen[..., c]) for c in range(1, imagen.shape[2]))
+    return all(
+        np.array_equal(primero, imagen[..., c]) for c in range(1, imagen.shape[2])
+    )
 
 
 def a_gris(imagen: NDArray[np.generic]) -> NDArray[np.generic]:
@@ -157,10 +159,12 @@ def detectar_inversion(gris: NDArray[np.generic]) -> bool:
 
     # Franjas laterales: campos pulmonares izquierdo y derecho.
     lx = int(ancho * 0.16)
-    pulmones = np.concatenate([
-        valores[y0:y1, lx:cx0].ravel(),
-        valores[y0:y1, cx1:ancho - lx].ravel(),
-    ])
+    pulmones = np.concatenate(
+        [
+            valores[y0:y1, lx:cx0].ravel(),
+            valores[y0:y1, cx1 : ancho - lx].ravel(),
+        ]
+    )
 
     if pulmones.size == 0 or mediastino.size == 0:
         return False
@@ -192,7 +196,9 @@ def leer(ruta: Path | str) -> NDArray[np.generic]:
     return skio.imread(ruta)
 
 
-def leer_gris(ruta: Path | str, corregir_inversion: bool = False) -> NDArray[np.generic]:
+def leer_gris(
+    ruta: Path | str, corregir_inversion: bool = False
+) -> NDArray[np.generic]:
     """Lee una imagen y la reduce a un solo canal.
 
     Es la entrada estándar del resto del proyecto.

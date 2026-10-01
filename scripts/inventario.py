@@ -41,7 +41,9 @@ for s, sub in g.groupby("subject_id"):
 print()
 
 print("--- demografia ---")
-print(f"  edad faltante: {(d.edad == '').sum()}   sexo faltante: {(d.sexo == '').sum()}")
+print(
+    f"  edad faltante: {(d.edad == '').sum()}   sexo faltante: {(d.sexo == '').sum()}"
+)
 print("  sexo:", d.sexo.value_counts().to_dict())
 e = pd.to_numeric(d.edad, errors="coerce")
 print(f"  edad: min={e.min():.0f} max={e.max():.0f} mediana={e.median():.0f}")

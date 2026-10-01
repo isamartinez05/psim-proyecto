@@ -183,12 +183,13 @@ def fraccion_fondo(gris: NDArray[np.generic], umbral: int = UMBRAL_FONDO) -> flo
     """Fracción de píxeles por debajo del umbral de fondo."""
     return float((np.asarray(gris) <= umbral).mean())
 
+
 def mascara_campo(
     gris: NDArray[np.generic],
     umbral: int = UMBRAL_FONDO,
     radio_cierre: int = RADIO_CIERRE,
 ) -> NDArray[np.bool_]:
-    """ Delimita el campo irradiado como region, no como rectangulo.
+    """Delimita el campo irradiado como region, no como rectangulo.
 
     El area irradiada de una radiografia colimada no es rectangular: la
     colimacion deja esquinas oscuras y bordes curvos, y una banda negra
@@ -207,7 +208,7 @@ def mascara_campo(
     """
     gris = np.asarray(gris)
     if gris.ndim != 2:
-        raise ValueError('Se requiere una imagen de un solo canal')
+        raise ValueError("Se requiere una imagen de un solo canal")
 
     con_senal = gris > umbral
     if not con_senal.any():
@@ -240,11 +241,11 @@ def mascara_campo(
 
 
 def _disco(radio: int) -> NDArray[np.bool_]:
-    """ Elemento estructurante circular de radio dado. """
+    """Elemento estructurante circular de radio dado."""
     y, x = np.ogrid[-radio : radio + 1, -radio : radio + 1]
     return (y * y + x * x) <= radio * radio
 
 
 def fraccion_campo(gris: NDArray[np.generic], umbral: int = UMBRAL_FONDO) -> float:
-    """ Fraccion de la imagen que ocupa el campo irradiado. """
+    """Fraccion de la imagen que ocupa el campo irradiado."""
     return float(mascara_campo(gris, umbral).mean())

@@ -1,0 +1,202 @@
+% Sustentacion del analisis exploratorio de imagenes
+% Compilar: latexmk -pdf -outdir=build/slides slides/presentacion.tex
+
+\documentclass[11pt]{beamer}
+
+\usetheme{Madrid}
+\usecolortheme{beaver}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{caption}[numbered]
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish]{babel}
+\usepackage{lmodern}
+\usepackage{graphicx}
+\usepackage{booktabs}
+
+\graphicspath{{slides/}{reports/}{figures/fase1/}{figures/fase2/}{figures/fase3/}{./}}
+
+\makeatletter
+\providecommand{\input@path}{}
+\edef\input@path{{reports/tablas/}{./}}
+\makeatother
+\input{cifras}
+
+\title[Estabilidad de descriptores]{Analisis exploratorio de imagenes y tabla de caracteristicas}
+\subtitle{Estabilidad de los descriptores morfologicos del campo pulmonar}
+\author[Trujillo \and Martinez]{Juanita Trujillo Narvaez \\ Karol Isabella Martinez Villarreal}
+\institute[ECI]{Ingenieria Biomedica \\ PSIM - 2026II - 80 \\ Docente: Ing. Pablo Eduardo Caicedo-Rodriguez, Ph.D.}
+\date{\today}
+
+\logo{\includegraphics[height=0.7cm]{Escuela_Rosario_logo.png}}
+
+\begin{document}
+
+% ---------------------------------------------------------------- 1
+\begin{frame}[plain]
+    \titlepage
+\end{frame}
+
+% ---------------------------------------------------------------- 2
+\begin{frame}{Problema, unidad y salida}
+\footnotesize
+\begin{columns}[T]
+\begin{column}{0.52\textwidth}
+\textbf{El problema}
+
+La delimitacion del campo pulmonar precede a toda medicion y es inestable:
+depende del detector, la exposicion y la patologia. Si la mascara se desplaza,
+los descriptores heredan esa variabilidad.
+
+\vspace{0.3cm}
+\textbf{Objetivo}
+
+Determinar que combinacion de realce y umbralizacion produce descriptores con
+menor error frente a la referencia, \textbf{consistente entre sitios}.
+\end{column}
+
+\begin{column}{0.46\textwidth}
+\begin{block}{Contrato de datos}
+\scriptsize
+\begin{tabular}{@{}ll@{}}
+Unidad & imagen $\times$ estrategia \\
+Clave & \texttt{sample\_id} \\
+U. independiente & la imagen \\
+Entrada & radiografia PA \\
+Salida & mascara (espacial) \\
+Referencia & trazada por personas \\
+Metodo & clasico, sin etapa supervisada \\
+Evaluacion & Dice y error relativo \\
+\end{tabular}
+\end{block}
+\end{column}
+\end{columns}
+
+\vspace{0.2cm}
+\scriptsize
+La tabla acompana al metodo y no lo sustituye: la salida espacial se conserva
+como mascara vinculada. No hay columna objetivo en sentido supervisado.
+\end{frame}
+
+% ---------------------------------------------------------------- 3
+\begin{frame}{Datos, calidad y particion}
+\footnotesize
+\begin{columns}[T]
+\begin{column}{0.45\textwidth}
+\textbf{Cohorte}: \NImagenesTotal{} radiografias de dos sitios,
+\NConMascara{} con mascara de referencia.
+
+\vspace{0.25cm}
+\textbf{Hallazgos de la auditoria}
+\begin{itemize}\scriptsize
+    \item Montgomery es de 8 bits, no 12 como indica la ficha
+    \item Ninguna imagen tiene la escala invertida
+    \item 335 de 800 estan en orientacion horizontal
+    \item Las 9 imagenes mas pequenas son los 9 pacientes menores de dos anos
+    \item 96 imagenes sin mascara: participan en la caracterizacion, no en la evaluacion
+\end{itemize}
+
+\vspace{0.2cm}
+\textbf{Particion} 70/15/15 por unidad independiente, estratificada por origen
+y clase, semilla fija. Los dos grupos de sujeto demostrados no se separan.
+\end{column}
+
+\begin{column}{0.53\textwidth}
+\begin{figure}
+\centering
+\includegraphics[width=\textwidth]{dimensiones.png}
+\end{figure}
+\scriptsize
+Montgomery entrega siempre el mismo tamano de archivo; Shenzhen lo ajusta al
+paciente. El area sin senal alcanza el 67\% en el caso mas colimado.
+\end{column}
+\end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------- 4
+\begin{frame}{Hallazgos del analisis exploratorio}
+\footnotesize
+\begin{figure}
+\centering
+\includegraphics[width=0.92\textwidth]{intensidad.png}
+\end{figure}
+
+\vspace{-0.2cm}
+\begin{columns}[T]
+\begin{column}{0.48\textwidth}
+\textbf{El sitio pesa mas que la clase}
+\scriptsize
+
+Mediana de intensidad: 111,0 en Montgomery frente a 173,5 en Shenzhen.
+Dentro de Montgomery, 110,0 sin hallazgos y 111,0 con hallazgos.
+
+Un descriptor que separase las clases estaria separando hospitales.
+\end{column}
+
+\begin{column}{0.48\textwidth}
+\textbf{Region de interes}
+\scriptsize
+
+El campo irradiado se delimita como region, no como rectangulo: recortar deja
+entre 20\% y 32\% de fondo porque el area irradiada no es rectangular.
+
+No se rellenan huecos: las axilas se registran al nivel del fondo y
+rellenarlas haria que la fraccion de area midiera el colimador.
+\end{column}
+\end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------- 5
+\begin{frame}{Resultado, tabla y reproduccion}
+\footnotesize
+\begin{columns}[T]
+\begin{column}{0.5\textwidth}
+\textbf{Ninguna estrategia de realce cumple el criterio}
+\scriptsize
+
+Criterio fijado antes de procesar: mejorar la linea base en 3 de 5
+descriptores, en \textbf{ambos} origenes.
+
+\vspace{0.15cm}
+\begin{tabular}{@{}lcc@{}}
+\toprule
+Estrategia & MC & SH \\
+\midrule
+clahe\_fijo & 2/5 & 4/5 \\
+eq\_adap & 3/5 & 1/5 \\
+\textit{las otras cuatro} & \multicolumn{2}{c}{\textit{peor}} \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.2cm}
+La mejor es \textbf{\MejorEstrategia{}}, sin realce: Dice \MejorDice{}
+(\MejorDiceMC{} / \MejorDiceSH{}). Un promedio agregado habria hecho pasar a
+clahe\_fijo.
+\end{column}
+
+\begin{column}{0.48\textwidth}
+\textbf{Tabla y prevencion de fuga}
+\scriptsize
+
+\NFilasTabla{} filas $\times$ \NColumnasTabla{} columnas. Predictores: los
+cinco descriptores sobre la mascara \emph{obtenida}.
+
+Excluidos de \texttt{model\_input.json}: todo \texttt{ref\_}, \texttt{err\_},
+Dice y Jaccard. Derivan de la referencia, que no existe en un caso nuevo.
+
+\vspace{0.15cm}
+11 comprobaciones automaticas sobre la tabla, todas superadas.
+
+\vspace{0.25cm}
+\textbf{Siguiente decision}
+\scriptsize
+
+Verificar si base\_adap mantiene su ventaja en validacion, y si la simetria
+izq-der sigue siendo el descriptor mas inestable una vez separado el fallo de
+segmentacion de la variacion anatomica.
+\end{column}
+\end{columns}
+\end{frame}
+
+\end{document}

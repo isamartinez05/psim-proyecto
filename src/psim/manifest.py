@@ -47,9 +47,7 @@ GRUPOS_SUJETO: dict[str, tuple[str, ...]] = {
     "MC_SUBJ_002": ("MCUCXR_0162_1", "MCUCXR_0166_1", "MCUCXR_0170_1"),
 }
 
-_SUJETO_DE_IMAGEN = {
-    img: suj for suj, imgs in GRUPOS_SUJETO.items() for img in imgs
-}
+_SUJETO_DE_IMAGEN = {img: suj for suj, imgs in GRUPOS_SUJETO.items() for img in imgs}
 
 _EVIDENCIA_DIRECTA = ("MCUCXR_0117_1", "MCUCXR_0166_1")
 
@@ -294,45 +292,49 @@ def construir(calcular_hash: bool = True) -> list[dict[str, object]]:
                     else "agrupado_por_sexo_edad_y_vistas_previas"
                 )
 
-            filas.append({
-                "image_id": image_id,
-                "subject_id": sujeto,
-                "subject_evidence": evidencia,
-                "dataset_id": conj.dataset_id,
-                "dataset_version": conj.dataset_version,
-                "site_id": conj.site_id,
-                "modality": conj.modality,
-                "relative_path": ruta.relative_to(DATA_RAW).as_posix(),
-                "sha256": props.sha256,
-                "height": props.height,
-                "width": props.width,
-                "depth": 1,
-                "channels": props.channels,
-                "orientacion": "vertical" if props.height >= props.width else "horizontal",
-                "dtype": props.dtype,
-                "bits_efectivos": props.bits_efectivos,
-                "intensity_unit": "stored",
-                "valor_min": props.valor_min,
-                "valor_max": props.valor_max,
-                "media": round(props.media, 4),
-                "desviacion": round(props.desviacion, 4),
-                "mediana": props.mediana,
-                "escala_invertida": int(props.escala_invertida),
-                "spacing_y_mm": conj.spacing_mm if conj.spacing_mm else "",
-                "spacing_x_mm": conj.spacing_mm if conj.spacing_mm else "",
-                "spacing_z_mm": "",
-                "edad": edad,
-                "edad_meses": edad_meses,
-                "sexo": sexo,
-                "target": target,
-                "target_source": "sufijo_del_nombre_de_archivo",
-                "hallazgo_texto": hallazgo,
-                "mask_path": mascara,
-                "mask_source": conj.mask_source if mascara else "",
-                "quality_status": "revisar" if razones else "aceptada",
-                "quality_reason": ";".join(razones),
-                "split": "",
-            })
+            filas.append(
+                {
+                    "image_id": image_id,
+                    "subject_id": sujeto,
+                    "subject_evidence": evidencia,
+                    "dataset_id": conj.dataset_id,
+                    "dataset_version": conj.dataset_version,
+                    "site_id": conj.site_id,
+                    "modality": conj.modality,
+                    "relative_path": ruta.relative_to(DATA_RAW).as_posix(),
+                    "sha256": props.sha256,
+                    "height": props.height,
+                    "width": props.width,
+                    "depth": 1,
+                    "channels": props.channels,
+                    "orientacion": "vertical"
+                    if props.height >= props.width
+                    else "horizontal",
+                    "dtype": props.dtype,
+                    "bits_efectivos": props.bits_efectivos,
+                    "intensity_unit": "stored",
+                    "valor_min": props.valor_min,
+                    "valor_max": props.valor_max,
+                    "media": round(props.media, 4),
+                    "desviacion": round(props.desviacion, 4),
+                    "mediana": props.mediana,
+                    "escala_invertida": int(props.escala_invertida),
+                    "spacing_y_mm": conj.spacing_mm if conj.spacing_mm else "",
+                    "spacing_x_mm": conj.spacing_mm if conj.spacing_mm else "",
+                    "spacing_z_mm": "",
+                    "edad": edad,
+                    "edad_meses": edad_meses,
+                    "sexo": sexo,
+                    "target": target,
+                    "target_source": "sufijo_del_nombre_de_archivo",
+                    "hallazgo_texto": hallazgo,
+                    "mask_path": mascara,
+                    "mask_source": conj.mask_source if mascara else "",
+                    "quality_status": "revisar" if razones else "aceptada",
+                    "quality_reason": ";".join(razones),
+                    "split": "",
+                }
+            )
 
     return filas
 

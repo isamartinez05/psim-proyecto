@@ -131,7 +131,9 @@ def repartir(
     return asignacion
 
 
-def construir(filas: list[dict[str, str]], semilla: int = SEMILLA) -> list[dict[str, str]]:
+def construir(
+    filas: list[dict[str, str]], semilla: int = SEMILLA
+) -> list[dict[str, str]]:
     """Construye las filas de la partición a partir del manifiesto."""
     grupos = grupos_independientes(filas)
     asignacion = repartir(grupos, semilla)
@@ -139,13 +141,15 @@ def construir(filas: list[dict[str, str]], semilla: int = SEMILLA) -> list[dict[
     salida: list[dict[str, str]] = []
     for gid, imagenes in grupos.items():
         for img in imagenes:
-            salida.append({
-                "image_id": img["image_id"],
-                "subject_id": img.get("subject_id", ""),
-                "grupo_id": gid,
-                "estrato": clave_estrato(img),
-                "split": asignacion[gid],
-            })
+            salida.append(
+                {
+                    "image_id": img["image_id"],
+                    "subject_id": img.get("subject_id", ""),
+                    "grupo_id": gid,
+                    "estrato": clave_estrato(img),
+                    "split": asignacion[gid],
+                }
+            )
     return sorted(salida, key=lambda f: f["image_id"])
 
 

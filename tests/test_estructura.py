@@ -86,6 +86,7 @@ def test_sin_bom() -> None:
 
 # --- Documentos de la Fase 1 ---------------------------------------------
 
+
 def _leer(nombre: str) -> list[dict]:
     with (DOCS / nombre).open(encoding="utf-8", newline="") as f:
         return list(csv.DictReader(f))
@@ -94,10 +95,22 @@ def _leer(nombre: str) -> list[dict]:
 def test_datasets_candidatos() -> None:
     """La guia (seccion 10.1) fija dieciseis columnas y exige tres candidatos."""
     columnas = [
-        "nombre", "fuente", "url", "modalidad", "formato", "n_sujetos",
-        "n_imagenes", "variable_objetivo", "metadatos", "licencia",
-        "tamano_descarga", "version", "fecha_consulta", "ventajas",
-        "limitaciones", "decision",
+        "nombre",
+        "fuente",
+        "url",
+        "modalidad",
+        "formato",
+        "n_sujetos",
+        "n_imagenes",
+        "variable_objetivo",
+        "metadatos",
+        "licencia",
+        "tamano_descarga",
+        "version",
+        "fecha_consulta",
+        "ventajas",
+        "limitaciones",
+        "decision",
     ]
     filas = _leer("datasets_candidatos.csv")
     assert list(filas[0].keys()) == columnas
@@ -111,8 +124,16 @@ def test_datasets_candidatos() -> None:
 def test_matriz_tecnicas() -> None:
     """La guia (seccion 12) fija once columnas y nueve bloques tecnicos."""
     columnas = [
-        "bloque", "tecnica", "fase", "entrada", "parametros", "producto",
-        "metrica", "decision_esperada", "archivo_codigo", "figura_o_tabla",
+        "bloque",
+        "tecnica",
+        "fase",
+        "entrada",
+        "parametros",
+        "producto",
+        "metrica",
+        "decision_esperada",
+        "archivo_codigo",
+        "figura_o_tabla",
         "estado",
     ]
     filas = _leer("matriz_tecnicas.csv")
@@ -151,6 +172,7 @@ def test_cronograma() -> None:
 
 
 # --- Coherencia entre el informe y los archivos que lo sustentan ----------
+
 
 def test_informe_coincide_con_la_matriz() -> None:
     """El informe afirma 53 tecnicas repartidas en 14, 30 y 9 por fase."""

@@ -1,142 +1,126 @@
-# Estabilidad de los descriptores morfológicos del campo pulmonar
+# Estabilidad de los descriptores morfologicos del campo pulmonar
 
-Proyecto semestral de Procesamiento de Señales e Imágenes Médicas (PSIM - 2026II - 80).
+Proyecto semestral de PSIM 2026II-80, Ingenieria Biomedica.
+Juanita Trujillo Narvaez y Karol Isabella Martinez Villarreal.
 
-**Equipo:** Juanita Trujillo Narváez (1000099467) y Karol Isabella Martínez Villarreal (1000099682)
+## Que hace este proyecto
 
-**Docente:** Ing. Pablo Eduardo Caicedo-Rodríguez. Ph.D.
+Compara nueve estrategias de segmentacion clasica del campo pulmonar en
+radiografias de torax de dos sitios de adquisicion, y mide cuanto se desplaza
+cada uno de cinco descriptores morfologicos respecto a mascaras trazadas por
+personas.
 
-**Programa:** Ingeniería Biomédica — Escuela Colombiana de Ingeniería Julio Garavito
+El resultado principal es negativo y esta sustentado: ninguna estrategia de
+realce mejora la linea base sin realce de forma consistente en los dos
+origenes. La mejor combinacion es `base_adap`, con Dice mediano de 0.810 y
+practicamente el mismo valor en ambos sitios.
 
-## Pregunta de investigación
+## Reconstruccion
 
-¿En qué medida las estrategias de realce de intensidad, umbralización y
-morfología modifican la estabilidad de los descriptores morfológicos del campo
-pulmonar (compacidad, relación de aspecto, fracción de área, simetría
-izquierda-derecha), respecto a los descriptores obtenidos sobre la máscara de
-referencia, en radiografías de tórax de los conjuntos Montgomery y Shenzhen de
-la National Library of Medicine?
+Desde una copia sin `.venv`, en Linux o PowerShell:
 
-## Conjunto de datos
 
-Montgomery County CXR Set (138 imágenes, CR, 12 bits) y Shenzhen Hospital CXR
-Set (662 imágenes, DR, 8 bits), publicados por la U.S. National Library of
-Medicine. Total: 800 imágenes, 704 con máscara de referencia.
+```
+uv sync --locked
+uv run ruff check .
+uv run ruff format --check .
+uv run pytest
+uv run python scripts/reproduce.py
+latexmk -pdf -interaction=nonstopmode -halt-on-error -outdir=build/reports reports/informe.tex
+latexmk -pdf -interaction=nonstopmode -halt-on-error -outdir=build/slides slides/presentacion.tex
+```
 
-- **Unidad de análisis:** la imagen, asumida equivalente al sujeto.
-- **Referencia:** Jaeger S et al. Quant Imaging Med Surg. 2014;4(6):475-477. PMCID: PMC4256233.
-- **Ficha completa:** `docs/dataset_card.md`
+`scripts/reproduce.py` tarda unos 35 minutos la primera vez, de los cuales 26
+corresponden a la extraccion de descriptores sobre 486 imagenes por nueve
+estrategias. Con `--rapido` reutiliza `data/processed/features.csv` y baja a
+unos 10 minutos. Con `--fase N` ejecuta solo una de las tres fases.
 
-## Estructura de las tres fases
+El guion crea las carpetas de salida que falten y verifica antes de empezar
+que los datos originales esten en su sitio.
 
-| Fase | Semanas | Propósito |
+## Datos
+
+Los datos no se versionan: sus condiciones de uso no permiten
+redistribuirlos. `data/raw/README.md` documenta de donde obtenerlos y
+`scripts/check_dataset.py` verifica que la copia local corresponde al conjunto
+descrito, comparando conteos, tamanos y hashes SHA-256 contra
+`results/fase1/manifiesto_datos.csv`.
+
+Son 800 radiografias PA: 138 del Montgomery County Chest X-ray Set y 662 del
+Shenzhen Hospital Chest X-ray Set, ambos de la U.S. National Library of
+Medicine, mas las mascaras de Shenzhen publicadas por el Instituto
+Politecnico de Kiev. En total unos 4.1 GB.
+
+`data/raw/` es de solo lectura. Ningun guion del proyecto escribe en esa
+carpeta; todo derivado va a `data/processed/`, `results/` o `figures/`.
+
+## Estructura
+
+```
+config/            Contrato de entrada al modelado
+data/metadata/         Manifiesto, particion y diccionario de variables
+data/processed/       Tabla de caracteristicas, regenerable
+data/raw/                   Datos originales, no versionados
+figures/                     Figuras por fase, regenerables
+reports/                     Fuente LaTeX del informe y tablas generadas
+results/                     Tablas de resultados por fase
+scripts/                     Guiones de construccion y verificacion
+slides/                       Fuente Beamer de la sustentacion
+src/psim/                   Paquete con las funciones del proyecto
+tests/             Pruebas de estructura y contratos de datos
+```
+
+## Productos
+
+| Archivo | Contenido |
+|---|---|
+| `data/metadata/manifest.csv` | 800 filas, una por imagen fuente |
+| `data/metadata/splits.csv` | Particion 70/15/15 por unidad independiente |
+| `data/metadata/feature_dictionary.csv` | 36 filas, una por columna de la tabla |
+| `data/processed/features.csv` | 4374 filas: 486 imagenes por 9 estrategias |
+| `config/model_input.json` | Predictores declarados y exclusiones razonadas |
+| `results/fase3/auditoria_tabla.csv` | 11 comprobaciones sobre la tabla |
+| `results/fase3/decisiones.csv` | 6 decisiones con evidencia y limitacion |
+| `build/reports/informe.pdf` | Informe compilado |
+| `build/slides/presentacion.pdf` | Sustentacion, 5 diapositivas |
+
+## Modulos
+
+| Modulo | Responsabilidad |
+|---|---|
+| `psim.io` | Lectura, reduccion a un canal y propiedades observables |
+| `psim.manifest` | Inventario y lectura de las lecturas clinicas |
+| `psim.splits` | Particion por unidad independiente |
+| `psim.recorte` | Delimitacion del campo irradiado |
+| `psim.mascaras` | Lectura unificada de las referencias de ambos conjuntos |
+| `psim.segmentacion` | Las nueve estrategias y las metricas de solapamiento |
+| `psim.features` | Los cinco descriptores y el error relativo |
+| `psim.eda` | Galeria y exploracion de la cohorte de entrenamiento |
+
+## Parametros fijados
+
+| Parametro | Valor | Donde |
 |---|---|---|
-| 1 | 1-5 | Formulación, adquisición y caracterización de los datos |
-| 2 | 6-11 | Procesamiento, segmentación y extracción de características |
-| 3 | 12-15 | Integración, validación y presentación en el Laboratorio 03 |
+| Semilla de particion | 20262 | `psim.splits.SEMILLA` |
+| Semilla de galeria | 20262 | `psim.eda.SEMILLA_GALERIA` |
+| Lado de trabajo | 512 px | `psim.segmentacion.LADO_TRABAJO` |
+| Umbral de fondo | 8 | `psim.recorte.UMBRAL_FONDO` |
+| Umbral de mascara | 128 | `psim.mascaras.UMBRAL_MASCARA` |
+| Wavelet | db2, nivel 1 | `psim.features.WAVELET` |
+| Intervalos de histograma | 64 | `psim.eda.BINS` |
 
-## Cómo reconstruir el entorno
+`results/fase1/entorno.json` registra las versiones de Python y de los
+paquetes con que se produjo cada ejecucion.
 
-Requisitos: Python 3.12 y uv (https://docs.astral.sh/uv/).
+## Nota sobre el banco comun
 
-    git clone <url-del-repositorio>
-    cd psim-proyecto
-    uv sync --locked
+El protocolo del laboratorio contempla un banco de verificacion compartido
+entre equipos. No se aplico por indicacion del docente, de modo que este
+repositorio no incluye `data/common/` ni `results/common_features.csv`.
 
-El comando `uv sync --locked` instala exactamente las versiones fijadas en
-`uv.lock`. No se usa `pip install` dentro del entorno del proyecto.
+## Contribuciones
 
-### Dependencias declaradas
-
-numpy, scipy, matplotlib, pandas, scikit-image, pywavelets, statsmodels.
-
-Dev: pytest, ruff.
-
-**¿Por qué no está opencv-python?** La guía del curso lo incluye en el comando
-de ejemplo, pero las 53 técnicas de la matriz de cobertura son cubribles con
-scikit-image y scipy. No se agrega una dependencia sin uso concreto en el diseño
-metodológico, conforme a la advertencia de la sección 14.1 de la guía.
-
-## Cómo obtener los datos
-
-Los datos originales no se redistribuyen en este repositorio. El procedimiento
-completo de descarga, con URLs, versiones, estructura esperada y verificación,
-está documentado en `data/raw/README.md`.
-
-Resumen:
-
-1. Descargar Montgomery y Shenzhen desde la NLM (enlaces en data/raw/README.md).
-2. Descargar las máscaras de Shenzhen desde Mendeley (DOI 10.17632/8gf9vpkhgy.2).
-3. Descomprimir en data/raw/ sin renombrar las carpetas.
-4. Verificar la copia:
-
-    uv run python scripts/check_dataset.py
-
-El script comprueba conteos, tamaños y hashes SHA-256, y escribe el manifiesto
-en results/fase1/manifiesto_datos.csv.
-
-## Cómo reproducir el proyecto
-
-    uv run python scripts/reproduce.py
-
-Regenera todo lo que hay en data/processed/, results/ y figures/ a partir
-de data/raw/, sin modificar los datos originales. También acepta --fase 1,
---fase 2 o --fase 3 para ejecutar una sola fase.
-
-Actualmente el script es un esqueleto que documenta la estructura de cada fase.
-Se irá llenando conforme avance el desarrollo.
-
-## Política de datos
-
-- data/raw/ contiene datos originales o instrucciones para obtenerlos. Nunca
-  se sobrescriben.
-- data/processed/ contiene datos derivados, regenerables con reproduce.py.
-- results/ y figures/ contienen productos regenerables. Ninguna tabla ni
-  figura del informe se edita a mano.
-- El manifiesto (results/fase1/manifiesto_datos.csv) es el único producto
-  derivado que se versiona, porque es la garantía de integridad.
-
-## Estructura del repositorio
-
-    psim-proyecto/
-    ├── .python-version          Python 3.12
-    ├── .gitignore
-    ├── README.md                Este archivo
-    ├── pyproject.toml           Dependencias declaradas
-    ├── uv.lock                  Versiones fijadas
-    ├── data/
-    │   ├── raw/                 Datos originales (no versionados)
-    │   │   └── README.md        Procedimiento de descarga y verificación
-    │   └── processed/           Datos derivados (regenerables)
-    ├── docs/
-    │   ├── formulacion_proyecto.tex
-    │   ├── sustentacion.tex
-    │   ├── referencias.bib
-    │   ├── dataset_card.md
-    │   ├── datasets_candidatos.csv
-    │   ├── matriz_tecnicas.csv
-    │   ├── cronograma.csv
-    │   └── Escuela_Rosario_logo.png
-    ├── figures/
-    │   ├── fase1/
-    │   ├── fase2/
-    │   └── fase3/
-    ├── results/
-    │   ├── fase1/
-    │   ├── fase2/
-    │   └── fase3/
-    ├── scripts/
-    │   ├── check_dataset.py     Verificación de integridad
-    │   └── reproduce.py         Reconstrucción completa
-    ├── src/
-    │   └── psim/
-    │       └── __init__.py
-    └── tests/
-
-## Verificación rápida
-
-    uv sync --locked                              # entorno
-    uv run ruff check src/ scripts/               # estilo
-    uv run pytest                                 # pruebas
-    uv run python scripts/check_dataset.py        # datos
-    uv run python scripts/reproduce.py            # pipeline
+Juanita Trujillo mantuvo la infraestructura reproducible, el entorno y los
+guiones de verificacion e inventario. Karol Martinez mantuvo el documento y la
+coherencia entre resultados y narrativa. Cada bloque tecnico tuvo una
+integrante que lo lidero y otra que lo reviso ejecutando el codigo.
