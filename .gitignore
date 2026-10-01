@@ -92,3 +92,6 @@ figures/fase3/*
 !build/reports/informe.pdf
 !build/slides/
 !build/slides/presentacion.pdf
+
+# La tabla de caracteristicas es el entregable central
+!data/processed/features.csv
