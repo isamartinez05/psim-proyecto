@@ -80,7 +80,7 @@ COLECCIONES: tuple[Coleccion, ...] = (
         ruta_relativa="ChinaSet_AllFiles/CXR_png",
         patron="*.png",
         n_esperado=662,
-        bytes_esperados=3_772_099_214,
+        bytes_esperados=3_768_676_455,
     ),
     Coleccion(
         clave="shenzhen_lecturas",

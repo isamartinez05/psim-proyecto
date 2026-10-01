@@ -36,8 +36,8 @@ ENV/
 .DS_Store
 
 # Project-specific
-data/raw/Montgomery/*
-data/raw/Shenzhen/*
+data/raw/*
+
 !data/raw/README.md
 # Datos derivados: se ignora el contenido, se conserva la estructura
 data/processed/*
