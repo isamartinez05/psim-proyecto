@@ -1,0 +1,226 @@
+% Sustentacion del laboratorio de modelado supervisado
+% Compilar desde la raiz:
+% latexmk -pdf -interaction=nonstopmode -halt-on-error -outdir=build/slides slides/presentacion.tex
+
+\documentclass[11pt]{beamer}
+
+\usetheme{Madrid}
+\usecolortheme{beaver}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{caption}[numbered]
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish]{babel}
+\usepackage{lmodern}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{amsmath}
+
+\graphicspath{{slides/}{reports/}{figures/modelado_proyecto/}{results/modelado_didactico/}{./}}
+
+\makeatletter
+\providecommand{\input@path}{}
+\edef\input@path{{reports/tablas/}{./}}
+\makeatother
+\input{lab005_cifras}
+
+\title[Modelado supervisado]{Modelado supervisado con regresion multiple}
+\subtitle{Estimacion de la fraccion pulmonar de referencia a partir de la segmentacion automatica}
+\author[Trujillo \and Martinez]{Juanita Trujillo Narvaez \\ Karol Isabella Martinez Villarreal}
+\institute[ECI]{Ingenieria Biomedica \\ PSIM - 2026II - 80 \\ Docente: Ing. Pablo Eduardo Caicedo-Rodriguez, Ph.D.}
+\date{\today}
+
+\logo{\includegraphics[height=0.7cm]{Escuela_Rosario_logo.png}}
+
+\begin{document}
+
+% ---------------------------------------------------------------- 1
+\begin{frame}[plain]
+    \titlepage
+\end{frame}
+
+% ---------------------------------------------------------------- 2
+\begin{frame}{Problema, salida y protocolo}
+\footnotesize
+\begin{columns}[T]
+\begin{column}{0.50\textwidth}
+\textbf{Pregunta}
+
+?`Los descriptores de la mascara \emph{automatica} permiten estimar la
+fraccion pulmonar de la mascara \emph{manual} en pacientes no usados para
+ajustar el modelo?
+
+\vspace{0.2cm}
+\begin{block}{Contrato}
+\scriptsize
+\begin{tabular}{@{}ll@{}}
+Unidad & paciente (\texttt{grupo\_id}) \\
+Salida & \texttt{ref\_fraccion\_area} (adim.) \\
+Referencia & mascara trazada por personas \\
+Estrategia & \texttt{base\_adap}, elegibles \\
+Metrica & RMSE, fijada antes \\
+Ruta binaria & no aplica: TB es control \\
+\end{tabular}
+\end{block}
+\end{column}
+
+\begin{column}{0.48\textwidth}
+\textbf{Del EDA al protocolo} (solo train)
+\scriptsize
+\begin{itemize}
+    \item Predictores por asociacion con el objetivo y signo consistente
+    entre origenes: \texttt{fraccion\_area} ($\rho=\ModRhoFA$),
+    \texttt{energia\_wavelet\_d1} ($\rho=\ModRhoEW$),
+    \texttt{simetria\_izq\_der} ($\rho=\ModRhoSI$)
+    \item Excluidos: \texttt{ref\_}, \texttt{err\_}, Dice, Jaccard, IDs y
+    origen
+    \item Efecto de centro: fraccion media \ModRefMediaMC{} (MC) frente a
+    \ModRefMediaSH{} (SH) $\Rightarrow$ errores por origen
+\end{itemize}
+
+\vspace{0.1cm}
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+ & Mascara & Elegibles & Pacientes \\
+\midrule
+Train & \ModMascTrain & \ModElegTrain & \ModNTrain \\
+Valid. & \ModMascVal & \ModElegVal & \ModNVal \\
+Prueba & \ModMascTest & \ModElegTest & \ModNTest \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.1cm}
+La prueba se extrajo \textbf{despues} de congelar el protocolo.
+\end{column}
+\end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------- 3
+\begin{frame}{Modelos y seleccion}
+\footnotesize
+\begin{columns}[T]
+\begin{column}{0.50\textwidth}
+\textbf{Candidatos} ($z_j$ estandarizado con train)
+\scriptsize
+\begin{align*}
+\text{G1:}\ \hat{y} &= \beta_0 + \textstyle\sum_j \beta_j z_j \\
+\text{G2:}\ \hat{y} &= \text{G1} + \textstyle\sum_{j\le k} \beta_{jk} z_j z_k
+\end{align*}
+Imputacion, escalamiento y expansion dentro del \emph{pipeline}, ajustados
+solo en train. Referencia: media de train.
+
+\vspace{0.2cm}
+\textbf{Practica comun (sinteticos)}
+\begin{itemize}
+    \item Continua: \DidModeloReg{} reconoce $x_0^2$; RMSE prueba
+    \DidRMSETestReg{} vs \DidRMSETestBase{}
+    \item Binaria: AUC \DidAUCTest{}, AP \DidAPTest{} (prevalencia
+    \DidPrevTest{}); sensibilidad \DidSensTest{} con umbral 0.5
+\end{itemize}
+\end{column}
+
+\begin{column}{0.48\textwidth}
+\textbf{Proyecto: validacion} ($n=\ModNVal$)
+
+\vspace{0.1cm}
+\begin{tabular}{@{}lr@{}}
+\toprule
+Modelo & RMSE \\
+\midrule
+Media de train & \ModRMSEValBase \\
+Grado 1 & \ModRMSEValUno \\
+\textbf{Grado 2} & \textbf{\ModRMSEValDos} \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.2cm}
+\scriptsize
+Se elige \textbf{\ModElegidoNombre{}} por la regla predeclarada. Su ventaja
+sobre grado 1 es modesta: casi todo el poder esta en el termino lineal.
+
+\vspace{0.1cm}
+Rango completo (\ModRangoDiseno), condicion \ModCondicion: coeficientes
+identificables. \texttt{fraccion\_area} domina; las interacciones son
+pequenas. Asociacion, no causalidad.
+\end{column}
+\end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------- 4
+\begin{frame}{Resultados en prueba y diagnostico}
+\footnotesize
+\begin{figure}
+\centering
+\includegraphics[width=0.86\textwidth]{prueba_prediccion_residuos.png}
+\end{figure}
+
+\vspace{-0.3cm}
+\begin{columns}[T]
+\begin{column}{0.48\textwidth}
+\textbf{Evaluacion unica, $n=\ModNTest$ pacientes}
+\scriptsize
+
+RMSE \textbf{\ModRMSETest} vs \ModRMSETestBase{} de la media
+(\ModMejoraTest\,\% menos), $R^2=\ModRTest$, igual a validacion.
+
+SH: \ModRMSETestSH{} ($n=\ModNTestSH$) \quad MC: \ModRMSETestMC{}
+($n=\ModNTestMC$). Residuo medio $\ModResTestSH$ y $\ModResTestMC$.
+\end{column}
+
+\begin{column}{0.48\textwidth}
+\textbf{Limites}
+\scriptsize
+\begin{itemize}
+    \item Regresion a la media en fracciones extremas
+    \item Montgomery con pocos casos; sin tercer centro
+    \item No aplica si la segmentacion falla (1 componente)
+    \item Sin intervalos de incertidumbre
+\end{itemize}
+\end{column}
+\end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------- 5
+\begin{frame}[fragile]{Reproduccion y siguiente decision}
+\footnotesize
+\begin{columns}[T]
+\begin{column}{0.52\textwidth}
+\textbf{Un comando reconstruye todo}
+\scriptsize
+\begin{verbatim}
+uv sync --locked
+uv run ruff check .
+uv run pytest
+uv run python scripts/reproduce.py
+\end{verbatim}
+
+\textbf{Comprobaciones automaticas}
+\begin{itemize}
+    \item Paciente que cruza particiones $\Rightarrow$ error
+    \item Objetivo, IDs o \texttt{ref\_} como predictor $\Rightarrow$ error
+    \item Imputacion aprendida solo en train
+    \item Hashes de train y validacion verificados
+    \item Prueba reconstruida: coeficientes y metricas identicos
+\end{itemize}
+\end{column}
+
+\begin{column}{0.46\textwidth}
+\textbf{Conclusion}
+\scriptsize
+
+Los descriptores automaticos estiman la fraccion pulmonar de referencia
+con error de \ModRMSETest{} en pacientes nuevos, del mismo orden en ambos
+centros.
+
+\vspace{0.3cm}
+\textbf{Siguiente decision}
+
+Calcular intervalos por bootstrap de pacientes y comparar el error con la
+variabilidad entre observadores, para decidir si la correccion es util en
+la practica.
+\end{column}
+\end{columns}
+\end{frame}
+
+\end{document}
