@@ -1,7 +1,7 @@
 """Congela el contrato de modelado del lab005 y la tabla de decisiones del EDA.
 
 Agrega la sección modelado_lab005 a config/model_input.json sin modificar el
-contrato del lab004, y escribe docs/decisiones_modelado.csv.
+Escribe el contrato del lab005 en config/modelado_lab005.json, separado del contrato del lab004.
 """
 
 import hashlib
@@ -10,7 +10,7 @@ from pathlib import Path
 
 import pandas as pd
 
-CONFIG = Path("config/model_input.json")
+CONFIG = Path("config/modelado_lab005.json")
 TRAIN = Path("data/processed/features.csv")
 
 contrato = {
@@ -56,10 +56,8 @@ contrato = {
     ),
 }
 
-config = json.loads(CONFIG.read_text(encoding="utf-8"))
-config["modelado_lab005"] = contrato
 CONFIG.write_text(
-    json.dumps(config, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+    json.dumps(contrato, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
 )
 
 decisiones = [

@@ -19,7 +19,7 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import PolynomialFeatures, StandardScaler
 
-CONTRATO = Path("config/model_input.json")
+CONTRATO = Path("config/modelado_lab005.json")
 PREFIJOS_PROHIBIDOS = ("ref_", "err_")
 COLUMNAS_PROHIBIDAS = frozenset(
     {
@@ -38,8 +38,8 @@ COLUMNAS_PROHIBIDAS = frozenset(
 
 
 def leer_contrato(ruta: Path = CONTRATO) -> dict[str, Any]:
-    """Devuelve la sección modelado_lab005 del contrato de entrada."""
-    return json.loads(ruta.read_text(encoding="utf-8"))["modelado_lab005"]
+    """Devuelve el contrato de modelado del lab005."""
+    return json.loads(ruta.read_text(encoding="utf-8"))
 
 
 def validar_predictores(predictores: list[str], objetivo: str) -> None:
