@@ -1,0 +1,9 @@
+hallazgo_eda,decision,comprobacion,limite
+"fraccion_area tiene la mayor asociación con el objetivo (Spearman 0.70; 0.66 China, 0.63 Montgomery)",Predictor principal,RMSE en validación frente a la media de entrenamiento,Comparte el denominador campo_px con el objetivo
+energia_wavelet_d1 se asocia con el objetivo (-0.51) con el mismo signo en ambos orígenes y redundancia moderada con fraccion_area (-0.41),Incluir como segundo predictor,Coeficiente y comparación de grados 1 y 2 en validación,Asociación observacional; su coeficiente no es un efecto causal
+simetria_izq_der tiene asociación débil (-0.23) pero de signo consistente,Incluir como tercer predictor,Se reporta aunque no mejore el RMSE de validación,Su aporte puede ser nulo
+compacidad no se asocia con el objetivo y relacion_aspecto invierte su signo entre orígenes,Excluir ambos,Ninguna adicional; la exclusión queda registrada en el contrato,Una relación no lineal o condicional al centro no se explora
+ref_fraccion_area es mayor en Montgomery (0.317) que en Shenzhen (0.260),No usar el origen como predictor; reportar errores por origen,Residuos por dataset_id en validación y prueba,Montgomery aporta solo 20 imágenes en validación y en prueba; no se verifica transporte a otro centro
+"Las columnas ref_, err_, dice y jaccard derivan de la máscara manual",Excluirlas como predictores,Prueba automática que falla si aparecen entre los predictores,El modelo solo usa información disponible sin máscara manual
+Dos pacientes aportan varias imágenes (5 imágenes en 2 grupos),Agregar por grupo_id con la media,Prueba que falla si un grupo se repite o cruza particiones,Pérdida mínima de información (3 filas)
+"Las segmentaciones con una sola componente no son elegibles (26 en train, 4 en validación)",Aplicar la misma regla de elegibilidad en todas las particiones,Conteos de elegibles por partición,El modelo no aplica cuando la segmentación automática falla

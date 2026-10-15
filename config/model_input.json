@@ -37,5 +37,49 @@
     "base_fijo",
     "base_otsu",
     "base_adap"
-  ]
+  ],
+  "modelado_lab005": {
+    "pregunta": "¿Los descriptores de la segmentación automática base_adap permiten estimar la fracción pulmonar de la máscara de referencia en imágenes no usadas para ajustar el modelo?",
+    "ruta": "continua",
+    "ruta_binaria": "No aplica: el proyecto no formula detección de TB y target está declarada como variable de control.",
+    "estrategia": "base_adap",
+    "filtro": "eligible_for_model == 1",
+    "grupo": "grupo_id",
+    "agregacion": "media por grupo_id de predictores y objetivo",
+    "objetivo": "ref_fraccion_area",
+    "unidad_objetivo": "adimensional (fracción del campo irradiado)",
+    "predictores": [
+      "fraccion_area",
+      "energia_wavelet_d1",
+      "simetria_izq_der"
+    ],
+    "excluidos": {
+      "compacidad": "asociación nula con el objetivo en train",
+      "relacion_aspecto": "signo de asociación inconsistente entre orígenes",
+      "ref_*, err_*, dice, jaccard": "derivan de la máscara de referencia",
+      "target, edad, sexo, dataset_id": "variables de control, no predictores"
+    },
+    "candidatos": [
+      "grado_1",
+      "grado_2"
+    ],
+    "referencia_sencilla": "media de ref_fraccion_area en entrenamiento",
+    "metrica_primaria": "RMSE",
+    "metricas_secundarias": [
+      "MAE",
+      "R2"
+    ],
+    "subgrupos_diagnostico": [
+      "dataset_id"
+    ],
+    "semilla": 2026,
+    "umbral": null,
+    "tablas": {
+      "train": "data/processed/features.csv",
+      "validation": "data/processed/features_validation.csv",
+      "test": "data/processed/features_test.csv"
+    },
+    "sha256_train": "d96164cd4e2dcfae6b5bbdd9540cbf3b9ffaba0a93ca1234953424268ee1d85e",
+    "politica_prueba": "features_test.csv se extrae solo después de congelar el protocolo y se evalúa una única vez."
+  }
 }
