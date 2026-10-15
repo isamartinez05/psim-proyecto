@@ -1,8 +1,12 @@
 """Reconstruye todos los productos derivados desde data/raw/.
 
-Este guion es el protocolo de reproduccion del proyecto. Encadena las tres
-fases en orden y regenera cuanto hay en data/metadata/, data/processed/,
-results/ y figures/ a partir de los datos originales, que no se modifican.
+Este guion es el protocolo de reproduccion del proyecto. Encadena las fases
+en orden y regenera cuanto hay en data/metadata/, data/processed/, results/
+y figures/ a partir de los datos originales, que no se modifican.
+
+Fases 1 a 3: laboratorios previos (manifiesto, EDA y tabla de caracteristicas).
+Fase 4: laboratorio de modelado (lab005). La particion de prueba se extrae
+despues de seleccionar el modelo y se evalua con el protocolo congelado.
 
 Requisitos previos:
     Los datos originales en data/raw/ segun data/raw/README.md.
@@ -10,7 +14,7 @@ Requisitos previos:
 Uso:
     uv run python scripts/reproduce.py
     uv run python scripts/reproduce.py --rapido
-    uv run python scripts/reproduce.py --fase 1
+    uv run python scripts/reproduce.py --fase 4 --rapido
 """
 
 from __future__ import annotations
@@ -39,12 +43,12 @@ def verificar_datos() -> bool:
     return True
 
 
-def correr(modulo: str, descripcion: str) -> float:
+def correr(modulo: str, descripcion: str, *argumentos: str) -> float:
     """Ejecuta un guion del proyecto y devuelve cuanto tardo."""
     print(f"\n--- {descripcion} ---")
     t0 = time.time()
     r = subprocess.run(
-        [sys.executable, str(RAIZ / "scripts" / modulo)],
+        [sys.executable, str(RAIZ / "scripts" / modulo), *argumentos],
         cwd=RAIZ,
         check=False,
     )
@@ -83,10 +87,40 @@ def fase_3(rapido: bool) -> None:
     correr("build_decisiones.py", "Fase 3: registro de decisiones")
 
 
+def extraer_reservada(split: str, rapido: bool) -> None:
+    """Extrae descriptores de una particion reservada, o la reutiliza en modo rapido."""
+    destino = RAIZ / "data" / "processed" / f"features_{split}.csv"
+    if rapido and destino.is_file():
+        print(f"\n--- Fase 4: extraccion de {split} omitida (--rapido) ---")
+        return
+    correr("build_features_holdout.py", f"Fase 4: descriptores de {split}", split)
+
+
+def fase_4(rapido: bool) -> None:
+    """Modelado del lab005: seleccion en validacion y evaluacion unica en prueba."""
+    if not (RAIZ / "data" / "processed" / "features.csv").is_file():
+        raise RuntimeError("La fase 4 requiere features.csv de la fase 3.")
+    extraer_reservada("validation", rapido)
+    correr("seleccion_predictores.py", "Fase 4: asociacion y redundancia en train")
+    correr("modelado_didactico.py", "Fase 4: practica comun con datos sinteticos")
+    correr("modelado_proyecto.py", "Fase 4: ajuste en train y seleccion en validacion")
+    # La prueba se extrae solo despues de congelar el protocolo.
+    extraer_reservada("test", rapido)
+    correr("evaluar_prueba.py", "Fase 4: evaluacion unica en prueba")
+
+
 def registrar_entorno() -> None:
     """Deja constancia de las versiones con que se produjo el resultado."""
     paquetes = {}
-    for nombre in ("numpy", "scipy", "pandas", "matplotlib", "skimage", "pywt"):
+    for nombre in (
+        "numpy",
+        "scipy",
+        "pandas",
+        "matplotlib",
+        "skimage",
+        "pywt",
+        "sklearn",
+    ):
         try:
             modulo = __import__(nombre)
             paquetes[nombre] = getattr(modulo, "__version__", "desconocida")
@@ -99,6 +133,7 @@ def registrar_entorno() -> None:
         "paquetes": paquetes,
         "semilla_particion": 20262,
         "semilla_galeria": 20262,
+        "semilla_modelado": 2026,
         "lado_trabajo": 512,
     }
     destino = resultado(1, "entorno.json")
@@ -115,11 +150,20 @@ def resumen_productos() -> None:
         "data/metadata/splits.csv",
         "data/metadata/feature_dictionary.csv",
         "data/processed/features.csv",
+        "data/processed/features_validation.csv",
+        "data/processed/features_test.csv",
         "config/model_input.json",
         "results/fase1/manifiesto_datos.csv",
         "results/fase2/dice_por_estrategia.csv",
         "results/fase3/auditoria_tabla.csv",
         "results/fase3/decisiones.csv",
+        "docs/decisiones_modelado.csv",
+        "results/modelado_didactico/validation_metrics.csv",
+        "results/modelado_didactico/test_metrics.csv",
+        "results/modelado_proyecto/validation_metrics.csv",
+        "results/modelado_proyecto/frozen_protocol.json",
+        "results/modelado_proyecto/test_metrics.csv",
+        "results/modelado_proyecto/test_predictions.csv",
     ]
     filas = []
     print("\n--- productos ---")
@@ -131,7 +175,7 @@ def resumen_productos() -> None:
             if existe and p.suffix == ".csv"
             else ""
         )
-        print(f"  {'OK   ' if existe else 'FALTA'} {rel:<42} {n}")
+        print(f"  {'OK   ' if existe else 'FALTA'} {rel:<52} {n}")
         filas.append({"producto": rel, "existe": int(existe), "filas": n})
 
     with resultado(3, "productos.csv").open("w", newline="", encoding="utf-8") as f:
@@ -145,14 +189,14 @@ def main() -> int:
     parser.add_argument(
         "--fase",
         type=int,
-        choices=[1, 2, 3],
+        choices=[1, 2, 3, 4],
         default=None,
         help="ejecutar solo una fase",
     )
     parser.add_argument(
         "--rapido",
         action="store_true",
-        help="reutilizar features.csv en lugar de recalcularlo",
+        help="reutilizar las tablas de descriptores en lugar de recalcularlas",
     )
     args = parser.parse_args()
 
@@ -160,15 +204,17 @@ def main() -> int:
         return 2
 
     t0 = time.time()
-    fases = [args.fase] if args.fase else [1, 2, 3]
+    fases = [args.fase] if args.fase else [1, 2, 3, 4]
 
     for n in fases:
         if n == 1:
             fase_1()
         elif n == 2:
             fase_2()
-        else:
+        elif n == 3:
             fase_3(args.rapido)
+        else:
+            fase_4(args.rapido)
 
     registrar_entorno()
     resumen_productos()
