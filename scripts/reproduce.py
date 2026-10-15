@@ -107,6 +107,7 @@ def fase_4(rapido: bool) -> None:
     # La prueba se extrae solo despues de congelar el protocolo.
     extraer_reservada("test", rapido)
     correr("evaluar_prueba.py", "Fase 4: evaluacion unica en prueba")
+    correr("build_tablas_modelado_tex.py", "Fase 4: tablas y cifras del informe")
 
 
 def registrar_entorno() -> None:

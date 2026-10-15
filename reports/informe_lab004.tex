@@ -1,0 +1,481 @@
+% Analisis exploratorio de imagenes del proyecto PSIM
+% Compilar: latexmk -pdf -outdir=build/reports reports/informe.tex
+
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish]{babel}
+\usepackage{lmodern}
+\usepackage{geometry}
+\geometry{left=2.6cm,right=2.6cm,top=2.8cm,bottom=2.6cm,headheight=1.4cm}
+\usepackage{setspace}
+\onehalfspacing
+
+\usepackage{hyperref}
+\hypersetup{colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue}
+\usepackage{graphicx}
+\usepackage{fancyhdr}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{caption}
+\usepackage{float}
+\usepackage{longtable}
+\usepackage{array}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\includegraphics[height=0.95cm]{Escuela_Rosario_logo.png}}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0pt}
+
+% Las rutas se resuelven desde el directorio de compilacion, que latexmk fija
+% en la raiz del proyecto. Declararlas aqui permite compilar con el comando
+% publico sin depender de desde donde se invoque.
+\makeatletter
+\providecommand{\input@path}{}
+\edef\input@path{{reports/}{reports/tablas/}{./}}
+\makeatother
+\graphicspath{{reports/}{figures/fase1/}{figures/fase2/}{figures/fase3/}{./}}
+
+\input{cifras}
+
+\newcommand{\tituloTrabajo}{Analisis exploratorio de imagenes y tabla de caracteristicas}
+\newcommand{\subtituloTrabajo}{Estabilidad de los descriptores morfologicos del campo pulmonar}
+
+\begin{document}
+
+\thispagestyle{empty}
+\begin{titlepage}
+    \centering
+    {\LARGE \textbf{\tituloTrabajo}}\\[0.6cm]
+    {\large \subtituloTrabajo}\\[2cm]
+    {\large \textbf{Juanita Trujillo Narvaez}. Cod: 1000099467}\\
+    {\large \textbf{Karol Isabella Martinez Villarreal}. Cod: 1000099682}\\[1cm]
+    {\large Ingenieria Biomedica}\\[0.4cm]
+    {\large PSIM - 2026II - 80}\\
+    Docente: Ing. Pablo Eduardo Caicedo-Rodriguez. Ph.D.
+    \vfill
+    Fecha de entrega: \today
+\end{titlepage}
+
+\tableofcontents
+\newpage
+
+\begin{abstract}
+Este documento presenta el analisis exploratorio de imagenes del proyecto
+semestral. Se audita la procedencia y la calidad de \NImagenesTotal{}
+radiografias de torax de dos sitios de adquisicion, se congela una particion
+por unidad independiente, se comparan nueve estrategias de segmentacion
+clasica contra mascaras de referencia trazadas por personas y se construye
+una tabla de \NFilasTabla{} filas con cinco descriptores morfologicos
+adimensionales, su valor de referencia y su error relativo. El resultado
+principal es negativo y esta sustentado: ninguna estrategia de realce mejora
+la linea base sin realce de forma consistente en los dos origenes.
+\end{abstract}
+
+\newpage
+
+\section{Problema, objetivos y tarea}
+
+\subsection{Problema}
+
+La delimitacion del campo pulmonar en una radiografia de torax es el paso
+previo a cualquier medicion cuantitativa, y es inestable. El contraste entre
+el pulmon y las estructuras vecinas depende de la tecnologia del detector, de
+los parametros de exposicion y de la presencia de hallazgos que opacifican el
+parenquima. Si la mascara obtenida se desplaza segun la estrategia de
+procesamiento aplicada, los descriptores morfologicos heredan esa variabilidad
+y dejan de ser comparables entre sujetos o entre sitios, aun cuando la
+anatomia subyacente no haya cambiado.
+
+\subsection{Decision de modelado}
+
+\begin{table}[H]
+\centering
+\small
+\caption{Ficha de la decision de modelado.}
+\begin{tabular}{@{}p{4.0cm}p{10.5cm}@{}}
+\toprule
+\textbf{Campo} & \textbf{Contenido} \\
+\midrule
+Objetivo & Determinar que combinacion de realce y umbralizacion produce descriptores con menor error relativo frente a la referencia, de forma consistente entre sitios \\
+\addlinespace
+Poblacion & \NImagenesTotal{} radiografias PA de Montgomery County (CR) y Shenzhen Hospital (DR), de las cuales \NConMascara{} tienen mascara de referencia \\
+\addlinespace
+Unidad de analisis & Una imagen procesada bajo una estrategia. La clave es \texttt{sample\_id}, que combina \texttt{image\_id} y \texttt{config\_id} \\
+\addlinespace
+Unidad independiente & La imagen. Ningun conjunto incluye identificador de paciente; se agrupan solo los dos casos demostrados por referencia cruzada \\
+\addlinespace
+Entrada disponible & La radiografia PA y sus metadatos tecnicos. La mascara de referencia no existe al procesar una imagen nueva \\
+\addlinespace
+Salida esperada & Espacial: la mascara del campo pulmonar. De ella se derivan cinco medidas adimensionales \\
+\addlinespace
+Referencia & Mascaras trazadas por personas. Montgomery bajo supervision de radiologo; Shenzhen por el Instituto Politecnico de Kiev \\
+\addlinespace
+Metodo previsto & Cadena clasica de realce, umbralizacion y morfologia. Sin etapa supervisada: no se ajusta ningun parametro a partir de etiquetas \\
+\addlinespace
+Evaluacion & Dice y Jaccard para la mascara; error relativo por descriptor frente a la referencia, estratificado por origen \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+La tarea es de segmentacion. La tabla de caracteristicas acompana al metodo y
+no lo sustituye: la salida espacial se conserva como mascara vinculada. No
+existe una columna objetivo en sentido supervisado, y la etiqueta de
+tuberculosis se registra como variable de control para la comparacion entre
+grupos, nunca como objetivo a predecir.
+
+\section{Datos del proyecto}
+
+\subsection{Procedencia y calidad}
+
+\input{inventario}
+
+La caracterizacion de la Fase 1 produjo cinco hallazgos que contradicen o
+precisan la documentacion publicada de los conjuntos:
+
+\begin{enumerate}
+    \item Las imagenes distribuidas de Montgomery son \texttt{uint8} con ocho
+    bits efectivos, no doce como indica la ficha original.
+    \item Ninguna de las \NImagenesTotal{} imagenes presenta la escala de
+    grises invertida. La inversion que la documentacion atribuye a Shenzhen no
+    esta en los archivos distribuidos.
+    \item Montgomery mezcla dos orientaciones: 97 verticales y 41
+    horizontales. Shenzhen tambien, con 368 y 294.
+    \item Shenzhen presenta 525 dimensiones distintas entre 662 imagenes.
+    \item Las nueve imagenes mas pequenas de Shenzhen corresponden a los nueve
+    pacientes menores de dos anos: el campo de radiografia se ajusta al tamano
+    del paciente, y no es un problema de codificacion.
+\end{enumerate}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{galeria_entrenamiento.png}
+\caption{Galeria de la cohorte de entrenamiento. La regla de muestreo cubre
+las dos clases y los dos origenes con dos casos cada uno, los extremos de
+resolucion, un paciente pediatrico y un caso marcado para revision en el
+inventario. La seleccion dentro de cada criterio es aleatoria con semilla fija.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{dimensiones.png}
+\caption{Distribucion de dimensiones por origen sobre las \NImagenesTrain{}
+imagenes de entrenamiento. Montgomery entrega siempre el mismo tamano de
+archivo; Shenzhen lo ajusta al paciente.}
+\end{figure}
+
+\subsection{Particion}
+
+\input{particion}
+
+La particion se define sobre unidades independientes y se congela con semilla
+fija. Las imagenes que las lecturas clinicas declaran de un mismo paciente
+permanecen juntas. La estratificacion es por origen y clase; la edad no entra
+en ella porque con cuarenta pacientes menores de dieciocho anos sobre
+\NImagenesTotal{} imagenes una tercera variable dejaria celdas de uno o dos
+elementos. Su reparto se verifico despues sin forzarlo: la edad mediana es de
+34, 35 y 31 anos en entrenamiento, validacion y prueba.
+
+El metodo del proyecto no ajusta parametros a partir de etiquetas, de modo que
+no existe el mecanismo por el cual la informacion de prueba podria filtrarse a
+un modelo entrenado. La particion cumple aqui dos funciones mas modestas:
+acotar el analisis exploratorio al subconjunto de entrenamiento, y dejar
+trazable que imagenes se usaron para decidir.
+
+\section{Metodos}
+
+\subsection{Lectura y escalas}
+
+Las radiografias se leen sin alterar sus valores. Las de Shenzhen vienen
+codificadas en tres canales RGB identicos, de modo que se toma un solo canal
+en lugar de aplicar pesos de luminancia: convertir con aritmetica una imagen
+que ya es gris introduce error de redondeo sin aportar nada. Esa identidad se
+verifica archivo por archivo y no se asume.
+
+Las intensidades son valores almacenados, no calibrados fisicamente. Ningun
+conjunto documenta transformacion de modalidad, y solo Montgomery declara
+espaciado de pixel. Por esa razon los descriptores del proyecto son
+adimensionales y las unidades espaciales se reportan en pixeles.
+
+\subsection{Region de interes}
+
+Montgomery entrega siempre 4020 por 4892 pixeles con independencia de cuanto
+colimo el tecnico. El area no irradiada queda registrada como negro puro y
+alcanza el 67 por ciento de la imagen en el caso mas extremo, frente a una
+mediana del uno por ciento en Shenzhen. Dividir el area pulmonar por el area
+de la imagen mediria entonces la apertura del colimador y no la anatomia del
+paciente.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{recorte_verificacion.png}
+\caption{Arriba, las seis imagenes de Montgomery con mas area no irradiada,
+con el rectangulo envolvente detectado; abajo, el resultado de recortar. El
+recorte reduce el fondo pero deja entre un 20 y un 32 por ciento, porque el
+area irradiada no es rectangular.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.78\textwidth]{diagnostico_mascara_campo.png}
+\caption{Delimitacion del campo irradiado como region. La fila central muestra
+el umbral crudo y la inferior la region final. Las zonas oscuras laterales son
+las axilas, que atenuan tan poco que se registran al nivel del fondo; no se
+rellenan, porque incorporarlas haria que el denominador midiera la apertura
+del colimador en lugar del cuerpo del paciente.}
+\end{figure}
+
+La region de interes es por tanto la region con senal, obtenida por umbral
+sobre el nivel de fondo y seleccion de la componente conexa mayor, sin relleno
+de huecos ni cierre morfologico. Sobre ella se calculan el histograma, el
+umbral de segmentacion y el denominador de la fraccion de area.
+
+\subsection{Mascaras de referencia}
+
+Los dos conjuntos entregan la referencia en formatos distintos. Montgomery
+usa dos archivos booleanos por imagen, uno por pulmon, a la resolucion de la
+imagen. Shenzhen usa un archivo \texttt{uint8} con los dos campos, fijo a 512
+por 512 pixeles y con valores intermedios propios del antialiasing del borde.
+
+La mascara de Shenzhen se reescala a la imagen por vecino mas cercano, porque
+es una etiqueta y no una medida: un valor intermedio entre pulmon y fondo no
+tiene interpretacion. Los valores intermedios son el 0,14 por ciento de los
+pixeles y binarizar en cualquier umbral entre 1 y 255 cambia el area menos del
+0,3 por ciento, de modo que se fija en 128 por reproducibilidad.
+
+El reescalado no crea detalle que la anotacion no tenga. La mascara de
+Shenzhen conserva la precision de 512 por 512 aunque se represente sobre una
+rejilla mayor, y esa limitacion se declara sin compensarla.
+
+\subsection{Estrategias comparadas}
+
+Se comparan nueve combinaciones de tres realces y tres umbralizaciones, con la
+morfologia fija en todas. Dejarla constante es deliberado: si variara junto
+con lo demas, una diferencia en el resultado no podria atribuirse a una causa
+concreta. La secuencia morfologica es cierre, relleno de huecos, apertura y
+seleccion de las dos componentes mayores.
+
+\begin{table}[H]
+\centering
+\small
+\caption{Parametros registrados de cada familia de tecnicas.}
+\begin{tabular}{@{}p{3.6cm}p{4.2cm}p{6.4cm}@{}}
+\toprule
+\textbf{Familia} & \textbf{Decision} & \textbf{Parametros} \\
+\midrule
+Muestreo y color & Aplicar & Canal unico verificado; lado de trabajo 512 px; sin espaciado fisico \\
+\addlinespace
+Intensidad e histogramas & Comparar & Sin realce, ecualizacion por CDF y CLAHE con limite 0,02 y rejilla de 8 \\
+\addlinespace
+Vecindarios y gradiente & No pertinente & El borde pulmonar se delimita por umbral; el gradiente no entra en el flujo final \\
+\addlinespace
+Umbralizacion y morfologia & Comparar & Umbral fijo al percentil 35, Otsu y adaptativo con bloque de 0,25 del lado; apertura 0,012 y cierre 0,020 \\
+\addlinespace
+Fourier 2D & No pertinente & No se observaron patrones periodicos que justifiquen filtrado en frecuencia \\
+\addlinespace
+Wavelets 2D & Aplicar & Familia db2, nivel 1, energia de los tres detalles normalizada por area \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Las tres estrategias sin realce son la linea base contra la que se mide el
+criterio de exito, y se conservan en todos los resultados.
+
+\subsection{Descriptores}
+
+\begin{table}[H]
+\centering
+\small
+\caption{Matriz de objetivo, propiedad observable, descriptor y uso previsto.}
+\begin{tabular}{@{}p{3.4cm}p{3.6cm}p{3.4cm}p{3.6cm}@{}}
+\toprule
+\textbf{Objetivo} & \textbf{Propiedad observable} & \textbf{Descriptor} & \textbf{Uso previsto} \\
+\midrule
+Cuantificar la forma del campo & Regularidad del contorno & Compacidad & Estabilidad frente a la estrategia \\
+\addlinespace
+Cuantificar la proporcion & Extension vertical frente a horizontal & Relacion de aspecto & Estabilidad y control de edad \\
+\addlinespace
+Cuantificar el volumen aireado & Area pulmonar sobre el cuerpo & Fraccion de area & Estabilidad y comparacion entre grupos \\
+\addlinespace
+Detectar afectacion unilateral & Diferencia entre campos & Simetria izq-der & Comparacion entre grupos \\
+\addlinespace
+Caracterizar el parenquima & Textura a escala fina & Energia wavelet & Comparacion entre origenes \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Cada descriptor se calcula igual sobre la mascara obtenida y sobre la de
+referencia, de modo que el error relativo entre ambos valores sea
+interpretable. Ninguna funcion de extraccion recibe la etiqueta de
+tuberculosis.
+
+\section{Resultados}
+
+\subsection{Variabilidad entre sitios}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{intensidad.png}
+\caption{Histogramas por imagen y resumen por unidad de analisis sobre las
+\NImagenesTrain{} imagenes de entrenamiento. El panel central muestra que los
+dos origenes forman nubes casi disjuntas en mediana e intervalo
+intercuartilico.}
+\end{figure}
+
+La mediana de intensidad es de 111,0 en Montgomery y 173,5 en Shenzhen, con
+intervalos intercuartilicos de 151,5 y 90,0. Dentro de cada origen, en cambio,
+las clases apenas difieren: en Montgomery la mediana es 110,0 para los casos
+sin hallazgos y 111,0 para los casos con manifestaciones.
+
+El efecto del sitio de adquisicion supera por tanto al de la clase. Un
+descriptor de intensidad que separase las clases estaria separando hospitales,
+y esa es la razon por la que toda metrica se reporta estratificada por origen.
+
+\subsection{Concordancia con la referencia}
+
+\input{dice}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{dice_por_estrategia.png}
+\caption{Concordancia por estrategia. En verde la linea base sin realce. El
+panel derecho contrasta el valor mediano en cada origen.}
+\end{figure}
+
+La mejor estrategia es \MejorEstrategia{}, con Dice mediano de \MejorDice{}, y
+es ademas la mas consistente entre sitios: \MejorDiceMC{} en Montgomery y
+\MejorDiceSH{} en Shenzhen. No aplica ningun realce.
+
+\subsection{Desplazamiento de los descriptores}
+
+\input{errores}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{error_descriptores.png}
+\caption{Error relativo mediano de cada descriptor frente a su valor de
+referencia, por estrategia. En verde la linea base.}
+\end{figure}
+
+La relacion de aspecto es el descriptor mas estable, con error relativo
+mediano entre 0,066 y 0,158 segun la estrategia. La simetria izquierda-derecha
+es el menos estable, entre 0,647 y 0,839. La compacidad se situa entre 0,410 y
+0,593.
+
+Parte de la inestabilidad de la simetria tiene una causa identificable: una
+segmentacion que pierde un campo pulmonar produce asimetria maxima, de modo
+que el descriptor mezcla variacion anatomica con fallo del metodo.
+
+\subsection{Criterio de exito}
+
+El criterio fijado antes de procesar los datos exige al menos una combinacion
+cuyo error relativo mediano mejore la linea base en tres de los cinco
+descriptores, de forma consistente en ambos origenes.
+
+\begin{table}[H]
+\centering
+\small
+\caption{Evaluacion del criterio de exito. Cada estrategia con realce se
+compara contra la linea base que comparte umbralizacion.}
+\begin{tabular}{@{}llccl@{}}
+\toprule
+\textbf{Estrategia} & \textbf{Linea base} & \textbf{Montgomery} & \textbf{Shenzhen} & \textbf{Resultado} \\
+\midrule
+clahe\_adap & base\_adap & 0/5 & 2/5 & no cumple \\
+clahe\_fijo & base\_fijo & 2/5 & 4/5 & no cumple \\
+clahe\_otsu & base\_otsu & 1/5 & 2/5 & no cumple \\
+eq\_adap & base\_adap & 3/5 & 1/5 & no cumple \\
+eq\_fijo & base\_fijo & 0/5 & 2/5 & no cumple \\
+eq\_otsu & base\_otsu & 2/5 & 3/5 & no cumple \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Ninguna de las seis combinaciones con realce cumple el criterio. Las dos que
+se acercan fallan precisamente por inconsistencia entre sitios: clahe\_fijo
+mejora cuatro de cinco descriptores en Shenzhen pero solo dos en Montgomery, y
+eq\_adap lo contrario.
+
+Ese resultado es negativo y esta sustentado. La pregunta de investigacion
+indaga en que medida las estrategias modifican la estabilidad de los
+descriptores, no presupone que la mejoren, y la tabla de riesgos del proyecto
+contemplaba este escenario antes de procesar los datos. Si se hubiera usado un
+promedio agregado en lugar de exigir consistencia en ambos origenes,
+clahe\_fijo habria parecido una mejora.
+
+\section{Decisiones para el modelado}
+
+\input{decisiones}
+
+\section{Reproducibilidad y limites}
+
+\subsection{Tabla de caracteristicas}
+
+La tabla tiene \NFilasTabla{} filas y \NColumnasTabla{} columnas: una fila por
+cada una de las \NConMascara{} imagenes con referencia en entrenamiento,
+procesada bajo cada una de las \NEstrategias{} estrategias. La clave es
+\texttt{sample\_id}.
+
+Los cinco descriptores calculados sobre la mascara obtenida son los unicos
+predictores declarados en \texttt{config/model\_input.json}. Las columnas con
+prefijo \texttt{ref\_} y \texttt{err\_}, junto con el Dice y el Jaccard,
+quedan explicitamente excluidas: derivan de la mascara de referencia, que no
+existe al procesar una imagen nueva. Usarlas como predictores seria circular.
+
+\input{auditoria}
+
+\subsection{Reconstruccion}
+
+Desde una copia sin entorno virtual, la secuencia publica es:
+
+\begin{verbatim}
+uv sync --locked
+uv run ruff check .
+uv run ruff format --check .
+uv run pytest
+uv run python scripts/reproduce.py
+latexmk -pdf -outdir=build/reports reports/informe.tex
+latexmk -pdf -outdir=build/slides slides/presentacion.tex
+\end{verbatim}
+
+Ningun numero de este documento se transcribe a mano: las tablas se generan
+desde los archivos de resultados y las cifras citadas en el texto proceden de
+macros producidas por el mismo guion. Los datos originales no se versionan por
+sus condiciones de uso; \texttt{data/raw/README.md} documenta como obtenerlos
+y \texttt{scripts/check\_dataset.py} verifica que la copia local corresponde al
+conjunto descrito.
+
+\subsection{Limites de interpretacion}
+
+\begin{enumerate}
+    \item Las mascaras de referencia proceden de dos trazados con convenciones
+    distintas. Las de Montgomery excluyen corazon y grandes vasos; las de
+    Shenzhen los delimitan. Es un sesgo sistematico entre origenes que no
+    puede corregirse.
+    \item Ningun conjunto incluye identificador de paciente. Se agrupan los
+    dos casos demostrados por referencia cruzada, y 90 imagenes de Montgomery
+    comparten sexo y edad con alguna otra sin que eso pruebe identidad.
+    \item El resultado sobre el realce es valido para los parametros
+    declarados. Un CLAHE con otro limite de recorte podria comportarse de otro
+    modo; ese espacio no se exploro.
+    \item Las 96 imagenes de Shenzhen sin mascara quedan fuera de toda
+    comparacion contra referencia. Participan en la caracterizacion pero no en
+    la evaluacion.
+    \item Con dos sitios no se puede distinguir si la diferencia observada
+    proviene del detector, del protocolo o de la poblacion.
+\end{enumerate}
+
+\subsection{Contribuciones}
+
+Juanita Trujillo mantuvo la infraestructura reproducible, el entorno y los
+guiones de verificacion e inventario. Karol Martinez mantuvo el documento y la
+coherencia entre los resultados y la narrativa. Cada bloque tecnico tuvo una
+integrante que lo lidero y otra que lo reviso ejecutando el codigo.
+
+\nocite{*}
+\bibliographystyle{plain}
+\bibliography{referencias}
+
+\end{document}

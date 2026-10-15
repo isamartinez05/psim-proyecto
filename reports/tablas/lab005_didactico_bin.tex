@@ -1,0 +1,16 @@
+\begin{table}[H]
+\centering
+\small
+\caption{Practica comun, ruta binaria (datos sinteticos, umbral 0.5)}
+\begin{tabular}{llrrrrr}
+\toprule
+\textbf{Poblacion} & \textbf{Modelo} & \textbf{ROC-AUC} & \textbf{AP} & \textbf{Brier} & \textbf{Sens.} & \textbf{Espec.} \\
+\midrule
+Validacion & Logistica C=0.1 & 0.8861 & 0.8544 & 0.1382 & 0.7059 & 0.9032 \\
+Validacion & Logistica C=1.0 & 0.8880 & 0.8551 & 0.1254 & 0.7059 & 0.8710 \\
+Validacion & Referencia constante & 0.5000 & 0.3542 & 0.2318 & 0.0000 & 1.0000 \\
+Prueba & Logistica C=1.0 & 0.8071 & 0.7269 & 0.1909 & 0.4500 & 0.8571 \\
+Prueba & Referencia constante & 0.5000 & 0.4167 & 0.2431 & 0.0000 & 1.0000 \\
+\bottomrule
+\end{tabular}
+\end{table}

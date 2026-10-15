@@ -1,0 +1,19 @@
+\begin{table}[H]
+\centering
+\small
+\caption{Del analisis exploratorio a las decisiones de modelado}
+\begin{tabular}{p{3.6cm}p{2.8cm}p{3.4cm}p{3.4cm}}
+\toprule
+\textbf{Hallazgo del EDA} & \textbf{Decision} & \textbf{Comprobacion} & \textbf{Limite} \\
+\midrule
+fraccion\_area tiene la mayor asociación con el objetivo (Spearman 0.70; 0.66 China, 0.63 Montgomery) & Predictor principal & RMSE en validación frente a la media de entrenamiento & Comparte el denominador campo\_px con el objetivo \\
+energia\_wavelet\_d1 se asocia con el objetivo (-0.51) con el mismo signo en ambos orígenes y redundancia moderada con fraccion\_area (-0.41) & Incluir como segundo predictor & Coeficiente y comparación de grados 1 y 2 en validación & Asociación observacional; su coeficiente no es un efecto causal \\
+simetria\_izq\_der tiene asociación débil (-0.23) pero de signo consistente & Incluir como tercer predictor & Se reporta aunque no mejore el RMSE de validación & Su aporte puede ser nulo \\
+compacidad no se asocia con el objetivo y relacion\_aspecto invierte su signo entre orígenes & Excluir ambos & Ninguna adicional; la exclusión queda registrada en el contrato & Una relación no lineal o condicional al centro no se explora \\
+ref\_fraccion\_area es mayor en Montgomery (0.317) que en Shenzhen (0.260) & No usar el origen como predictor; reportar errores por origen & Residuos por dataset\_id en validación y prueba & Montgomery aporta solo 20 imágenes en validación y en prueba; no se verifica transporte a otro centro \\
+Las columnas ref\_, err\_, dice y jaccard derivan de la máscara manual & Excluirlas como predictores & Prueba automática que falla si aparecen entre los predictores & El modelo solo usa información disponible sin máscara manual \\
+Dos pacientes aportan varias imágenes (5 imágenes en 2 grupos) & Agregar por grupo\_id con la media & Prueba que falla si un grupo se repite o cruza particiones & Pérdida mínima de información (3 filas) \\
+Las segmentaciones con una sola componente no son elegibles (26 en train, 4 en validación) & Aplicar la misma regla de elegibilidad en todas las particiones & Conteos de elegibles por partición & El modelo no aplica cuando la segmentación automática falla \\
+\bottomrule
+\end{tabular}
+\end{table}
