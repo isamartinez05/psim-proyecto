@@ -95,3 +95,8 @@ figures/fase3/*
 
 # La tabla de caracteristicas es el entregable central
 !data/processed/features.csv
+
+# Auxiliares de Beamer
+build/**/*.nav
+build/**/*.snm
+build/**/*.vrb
