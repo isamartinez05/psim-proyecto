@@ -224,6 +224,26 @@ def graficar(
     plt.close(fig)
 
 
+def graficar_distribuciones(pacientes: pd.DataFrame, descriptores: list[str]) -> None:
+    """Distribucion de cada descriptor de referencia por grupo y sitio."""
+    fig, ejes = plt.subplots(len(ORIGEN), len(descriptores), figsize=(17, 6.5))
+    for i, (sitio, nombre) in enumerate(ORIGEN.items()):
+        s = pacientes[pacientes["dataset_id"] == sitio]
+        for j, d in enumerate(descriptores):
+            grupos = [s.loc[s["target"] == t, f"ref_{d}"].dropna() for t in (0, 1)]
+            ejes[i, j].violinplot(grupos, showmedians=True)
+            ejes[i, j].set_xticks(
+                [1, 2], ["sin hallazgos", "con hallazgos"], fontsize=8
+            )
+            ejes[i, j].set_title(f"{nombre}: {d}", fontsize=9)
+    fig.suptitle(
+        "Distribucion de los descriptores de referencia por grupo (un punto por paciente)"
+    )
+    fig.tight_layout()
+    fig.savefig(FIG / "distribuciones.png", dpi=150)
+    plt.close(fig)
+
+
 def main() -> None:
     """Ejecuta el analisis principal, la estabilidad y la sensibilidad."""
     plt.switch_backend("Agg")
@@ -247,6 +267,8 @@ def main() -> None:
     cov = covariables(pacientes)
     cov.to_csv(OUT / "oe5_covariables.csv", index=False)
     graficar(r_ref, r_auto, descriptores)
+    pacientes.to_csv(OUT / "oe5_pacientes.csv", index=False)
+    graficar_distribuciones(pacientes, descriptores)
 
     poblacion = set(elegibles.loc[elegibles["split"] == "train", "grupo_id"])
     r_est = estrategias_train(t, poblacion, descriptores, contrato)

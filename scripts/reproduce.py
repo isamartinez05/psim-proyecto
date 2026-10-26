@@ -7,9 +7,9 @@ y figures/ a partir de los datos originales, que no se modifican.
 Fases 1 a 3: laboratorios previos (manifiesto, EDA y tabla de caracteristicas).
 Fase 4: laboratorio de modelado (lab005). La particion de prueba se extrae
 despues de seleccionar el modelo y se evalua con el protocolo congelado.
-Fase 5: OE4 (desplazamiento de cada descriptor por particion y origen) y OE5
-(diferencias entre grupos con el protocolo congelado en config/analisis_oe5.json,
-y su sensibilidad a la segmentacion).
+Fase 5: OE2 (realce, ruido, frecuencia, wavelets, intensidad y geometria sobre
+una muestra estratificada), OE4 (desplazamiento de cada descriptor) y OE5
+(diferencias entre grupos con el protocolo congelado en config/analisis_oe5.json).
 
 Requisitos previos:
     Los datos originales en data/raw/ segun data/raw/README.md.
@@ -115,13 +115,20 @@ def fase_4(rapido: bool) -> None:
 
 
 def fase_5() -> None:
-    """OE4 y OE5: desplazamiento de descriptores y diferencias entre grupos."""
+    """OE2, OE4 y OE5, y auditoria de la matriz de tecnicas."""
+    # OE2: el lote espacial crea la muestra que usan los demas lotes.
+    correr("oe2_espacial.py", "Fase 5: OE2, filtros espaciales y bordes")
+    correr("oe2_frecuencia.py", "Fase 5: OE2, dominio de frecuencia")
+    correr("oe2_wavelets.py", "Fase 5: OE2, wavelets y multirresolucion")
+    correr("oe2_intensidad.py", "Fase 5: OE2, histogramas e intensidad")
+    correr("oe2_geometria.py", "Fase 5: OE2, geometria y morfologia")
     for nombre in ("features_validation.csv", "features_test.csv"):
         if not (RAIZ / "data" / "processed" / nombre).is_file():
-            raise RuntimeError(f"La fase 5 requiere {nombre} de la fase 4.")
+            raise RuntimeError(f"OE4 y OE5 requieren {nombre} de la fase 4.")
     correr("error_descriptores.py", "Fase 5: OE4, desplazamiento por particion")
     correr("analisis_oe5.py", "Fase 5: OE5, diferencias entre grupos")
     correr("figura_oe5_estrategias.py", "Fase 5: OE5, conclusiones por estrategia")
+    correr("auditar_matriz.py", "Fase 5: auditoria de la matriz de tecnicas")
 
 
 def registrar_entorno() -> None:
@@ -149,6 +156,7 @@ def registrar_entorno() -> None:
         "semilla_particion": 20262,
         "semilla_galeria": 20262,
         "semilla_modelado": 2026,
+        "semilla_oe2": 2026,
         "semilla_oe5": 2026,
         "lado_trabajo": 512,
     }
@@ -182,12 +190,23 @@ def resumen_productos() -> None:
         "results/modelado_proyecto/frozen_protocol.json",
         "results/modelado_proyecto/test_metrics.csv",
         "results/modelado_proyecto/test_predictions.csv",
+        "results/fase2/muestra_oe2.csv",
+        "results/fase2/metricas_realce.csv",
+        "results/fase2/decision_realce_espacial.csv",
+        "results/fase2/decision_realce_frecuencia.csv",
+        "results/fase2/espectro_por_origen.csv",
+        "results/fase3/energia_subbandas_por_origen.csv",
+        "results/fase2/especificacion_por_origen.csv",
+        "results/fase2/decision_realce_histograma.csv",
+        "results/fase2/conectividad_componentes.csv",
         "results/fase3/error_descriptores_particiones.csv",
+        "results/fase3/oe5_pacientes.csv",
         "results/fase3/oe5_comparacion.csv",
         "results/fase3/oe5_estabilidad.csv",
         "results/fase3/oe5_covariables.csv",
         "results/fase3/oe5_estrategias_train.csv",
         "results/fase3/oe5_acuerdo_estrategias.csv",
+        "results/fase3/auditoria_matriz.csv",
     ]
     filas = []
     print("\n--- productos ---")
