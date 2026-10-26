@@ -1,0 +1,47 @@
+{
+  "pregunta": "Los descriptores morfologicos del campo pulmonar difieren entre radiografias con y sin hallazgos de tuberculosis, dentro de cada sitio?",
+  "encuadre": "Caracterizacion morfometrica entre grupos; no es deteccion ni tamizaje.",
+  "unidad": "paciente (grupo_id); las imagenes de un paciente se promedian",
+  "poblacion": "Pacientes con imagenes elegibles de base_adap en train, validation y test. OE5 no selecciona modelos, por lo que no requiere particion reservada.",
+  "estrategia": "base_adap",
+  "filtro": "eligible_for_model == 1",
+  "grupo": "target (0 = sin hallazgos, 1 = con hallazgos de TB)",
+  "estratos": [
+    "NLM-ChinaCXRSet",
+    "NLM-MontgomeryCXRSet"
+  ],
+  "descriptores": [
+    "compacidad",
+    "relacion_aspecto",
+    "fraccion_area",
+    "simetria_izq_der",
+    "energia_wavelet_d1"
+  ],
+  "fuente_principal": "referencia (columnas ref_*)",
+  "sensibilidad": [
+    "automatica: descriptores de base_adap, misma poblacion",
+    "estrategias: las nueve configuraciones, solo particion train"
+  ],
+  "prueba": "Mann-Whitney U bilateral",
+  "efecto": "delta de Cliff (positivo = mayor en el grupo con hallazgos)",
+  "intervalo": {
+    "metodo": "bootstrap percentil por paciente",
+    "replicas": 2000,
+    "nivel": 0.95
+  },
+  "correccion": "Holm sobre 10 pruebas (5 descriptores x 2 sitios) por fuente",
+  "alfa": 0.05,
+  "semilla": 2026,
+  "criterio_estabilidad": "Una conclusion es estable si referencia y automatica coinciden en la decision tras Holm y en el signo del delta de Cliff.",
+  "limitaciones": [
+    "Montgomery aporta pocos pacientes por grupo",
+    "La etiqueta proviene de lecturas clinicas, no de confirmacion diagnostica",
+    "Edad y sexo pueden confundir la comparacion",
+    "Las diferencias son asociaciones, no efectos causales"
+  ],
+  "sha256": {
+    "train": "d96164cd4e2dcfae6b5bbdd9540cbf3b9ffaba0a93ca1234953424268ee1d85e",
+    "validation": "7683de5a7e58469d8421f3480fb43135cd66a63922937d1e1ba44a5d7a3efd6d",
+    "test": "e575aa60fb0c7801cbff090910669bc3d6a2927335c50688041d82e4c0fade5f"
+  }
+}
