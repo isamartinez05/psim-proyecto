@@ -7,6 +7,9 @@ y figures/ a partir de los datos originales, que no se modifican.
 Fases 1 a 3: laboratorios previos (manifiesto, EDA y tabla de caracteristicas).
 Fase 4: laboratorio de modelado (lab005). La particion de prueba se extrae
 despues de seleccionar el modelo y se evalua con el protocolo congelado.
+Fase 5: OE4 (desplazamiento de cada descriptor por particion y origen) y OE5
+(diferencias entre grupos con el protocolo congelado en config/analisis_oe5.json,
+y su sensibilidad a la segmentacion).
 
 Requisitos previos:
     Los datos originales en data/raw/ segun data/raw/README.md.
@@ -15,6 +18,7 @@ Uso:
     uv run python scripts/reproduce.py
     uv run python scripts/reproduce.py --rapido
     uv run python scripts/reproduce.py --fase 4 --rapido
+    uv run python scripts/reproduce.py --fase 5
 """
 
 from __future__ import annotations
@@ -110,6 +114,16 @@ def fase_4(rapido: bool) -> None:
     correr("build_tablas_modelado_tex.py", "Fase 4: tablas y cifras del informe")
 
 
+def fase_5() -> None:
+    """OE4 y OE5: desplazamiento de descriptores y diferencias entre grupos."""
+    for nombre in ("features_validation.csv", "features_test.csv"):
+        if not (RAIZ / "data" / "processed" / nombre).is_file():
+            raise RuntimeError(f"La fase 5 requiere {nombre} de la fase 4.")
+    correr("error_descriptores.py", "Fase 5: OE4, desplazamiento por particion")
+    correr("analisis_oe5.py", "Fase 5: OE5, diferencias entre grupos")
+    correr("figura_oe5_estrategias.py", "Fase 5: OE5, conclusiones por estrategia")
+
+
 def registrar_entorno() -> None:
     """Deja constancia de las versiones con que se produjo el resultado."""
     paquetes = {}
@@ -135,6 +149,7 @@ def registrar_entorno() -> None:
         "semilla_particion": 20262,
         "semilla_galeria": 20262,
         "semilla_modelado": 2026,
+        "semilla_oe5": 2026,
         "lado_trabajo": 512,
     }
     destino = resultado(1, "entorno.json")
@@ -154,6 +169,8 @@ def resumen_productos() -> None:
         "data/processed/features_validation.csv",
         "data/processed/features_test.csv",
         "config/model_input.json",
+        "config/modelado_lab005.json",
+        "config/analisis_oe5.json",
         "results/fase1/manifiesto_datos.csv",
         "results/fase2/dice_por_estrategia.csv",
         "results/fase3/auditoria_tabla.csv",
@@ -165,6 +182,12 @@ def resumen_productos() -> None:
         "results/modelado_proyecto/frozen_protocol.json",
         "results/modelado_proyecto/test_metrics.csv",
         "results/modelado_proyecto/test_predictions.csv",
+        "results/fase3/error_descriptores_particiones.csv",
+        "results/fase3/oe5_comparacion.csv",
+        "results/fase3/oe5_estabilidad.csv",
+        "results/fase3/oe5_covariables.csv",
+        "results/fase3/oe5_estrategias_train.csv",
+        "results/fase3/oe5_acuerdo_estrategias.csv",
     ]
     filas = []
     print("\n--- productos ---")
@@ -190,7 +213,7 @@ def main() -> int:
     parser.add_argument(
         "--fase",
         type=int,
-        choices=[1, 2, 3, 4],
+        choices=[1, 2, 3, 4, 5],
         default=None,
         help="ejecutar solo una fase",
     )
@@ -205,7 +228,7 @@ def main() -> int:
         return 2
 
     t0 = time.time()
-    fases = [args.fase] if args.fase else [1, 2, 3, 4]
+    fases = [args.fase] if args.fase else [1, 2, 3, 4, 5]
 
     for n in fases:
         if n == 1:
@@ -214,8 +237,10 @@ def main() -> int:
             fase_2()
         elif n == 3:
             fase_3(args.rapido)
-        else:
+        elif n == 4:
             fase_4(args.rapido)
+        else:
+            fase_5()
 
     registrar_entorno()
     resumen_productos()
