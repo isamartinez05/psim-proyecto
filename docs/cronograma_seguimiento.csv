@@ -1,0 +1,16 @@
+semana,actividad,estado,nota
+1,Formulacion inicial del problema y pregunta de investigacion,completado,
+2,Busqueda comparacion y seleccion del conjunto de datos,completado,
+3,Ficha del conjunto de datos y procedimiento reproducible de descarga,completado,
+4,Descarga verificacion de integridad y caracterizacion de digitalizacion,completado,
+5,Analisis de pixeles vecindad conectividad y regiones e histogramas iniciales; cierre de Fase 1,completado,
+6,Espacios de intensidad normalizacion y transformaciones puntuales,completado,"completado en la semana 14 con OE2 (scripts oe2_*), fuera del orden previsto"
+7,Operaciones de vecindad filtros de ruido y operadores de borde,completado,"completado en la semana 14 con OE2 (scripts oe2_*), fuera del orden previsto"
+8,Histogramas ecualizacion CLAHE y especificacion entre origenes,completado,ecualizacion y CLAHE en las 9 estrategias; especificacion de histograma en la semana 14
+9,Umbralizacion y morfologia; evaluacion contra mascaras de referencia,completado,
+10,Dominio de frecuencia y transformada wavelet continua sobre perfil 1D,completado,"completado en la semana 14 con OE2 (scripts oe2_*), fuera del orden previsto"
+11,Descomposicion wavelet 2D energia por subbanda y cierre de Fase 2,completado,DWT de un nivel en features.py; tres niveles y comparacion entre origenes en la semana 14
+12,Reconstruccion del flujo completo desde data/raw con las estrategias justificadas,completado,
+13,Extraccion de descriptores y calculo del error relativo frente a la referencia,completado,
+14,Analisis estadistico prueba de hipotesis y analisis de sensibilidad,completado,
+15,Regeneracion limpia desde cero informe final y presentacion en el Laboratorio 03,en_curso,

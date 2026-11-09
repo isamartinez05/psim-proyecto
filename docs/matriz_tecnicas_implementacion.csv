@@ -1,0 +1,54 @@
+bloque,tecnica,archivo_real,producto_real,nota,estado
+Representacion y digitalizacion,Inspeccion de formato y metadatos,src/psim/io.py,results/fase1/manifiesto_datos.csv,,completado
+Representacion y digitalizacion,Verificacion de resolucion espacial y muestreo,src/psim/io.py,results/fase1/manifiesto_datos.csv,,completado
+Representacion y digitalizacion,Analisis de cuantizacion y resolucion de intensidad,src/psim/io.py,results/fase1/manifiesto_datos.csv,bits efectivos por imagen en el manifiesto,completado
+Representacion y digitalizacion,Submuestreo controlado,src/psim/segmentacion.py,figures/fase1/submuestreo.png,reduccion a 512 px; aliasing ilustrado en oe2_intensidad.py,completado
+Representacion y digitalizacion,Requantizacion controlada,src/psim/intensidad.py,figures/fase1/requantizacion.png,,completado
+Representacion y digitalizacion,Correccion de escala invertida Shenzhen,src/psim/io.py,results/fase1/manifiesto_datos.csv,no_aplica: se verifico que ninguna imagen esta invertida,no_aplica
+Representacion y digitalizacion,Vecindad adyacencia y conectividad,src/psim/geometria.py,figures/fase1/conectividad.png,,completado
+Representacion y digitalizacion,Etiquetado de regiones conexas,src/psim/geometria.py,results/fase2/conectividad_componentes.csv,conteo con vecindad 4 y 8 en la muestra de OE2,completado
+Representacion y digitalizacion,Transformada de distancia y extraccion de borde,src/psim/geometria.py,figures/fase1/distancia_borde.png,,completado
+Espacios e intensidad,Verificacion de canales RGB y conversion a gris,src/psim/io.py,results/fase1/manifiesto_datos.csv,canales_son_identicos y a_gris,completado
+Espacios e intensidad,Exploracion del espacio HSV,src/psim/io.py,results/fase1/manifiesto_datos.csv,no_aplica: radiografias en gris con canales identicos; HSV no aporta,no_aplica
+Espacios e intensidad,Operaciones aritmeticas entre imagenes,src/psim/intensidad.py,figures/fase2/mapas_diferencia.png,,completado
+Espacios e intensidad,Normalizacion de rango dinamico,src/psim/intensidad.py,figures/fase2/transformaciones_intensidad.png,,completado
+Espacios e intensidad,Transformaciones puntuales de intensidad,src/psim/intensidad.py,figures/fase2/transformaciones_intensidad.png,gamma y logaritmica,completado
+Operaciones de vecindad,Filtro de media,src/psim/espacial.py,figures/fase2/filtros_comparacion.png,,completado
+Operaciones de vecindad,Filtro de mediana,src/psim/espacial.py,figures/fase2/median_comparison.png,,completado
+Operaciones de vecindad,Filtro gaussiano,src/psim/espacial.py,figures/fase2/filtros_comparacion.png,,completado
+Operaciones de vecindad,Operador Sobel,src/psim/espacial.py,figures/fase2/bordes_comparacion.png,,completado
+Operaciones de vecindad,Operador Prewitt,src/psim/espacial.py,figures/fase2/bordes_comparacion.png,,completado
+Operaciones de vecindad,Operador Roberts,src/psim/espacial.py,figures/fase2/bordes_comparacion.png,,completado
+Operaciones de vecindad,Operador Laplaciano,src/psim/espacial.py,figures/fase2/bordes_comparacion.png,,completado
+Operaciones de vecindad,Realce por unsharp masking,src/psim/espacial.py,figures/fase2/realce_comparacion.png,,completado
+Operaciones de vecindad,Operador direccional emboss,src/psim/espacial.py,figures/fase2/emboss.png,,completado
+Histogramas,Histograma de intensidad y funcion de distribucion acumulada,src/psim/histograma.py,figures/fase1/histogramas.png,,completado
+Histogramas,Comparacion de distribuciones entre origenes,src/psim/histograma.py,figures/fase1/histogramas.png,histograma y CDF por origen en la misma figura,completado
+Histogramas,Ecualizacion global de histograma,src/psim/histograma.py,figures/fase2/ecualizacion_comparacion.png,tambien como estrategia eq_* en segmentacion.py,completado
+Histogramas,Ecualizacion adaptativa limitada por contraste,src/psim/histograma.py,figures/fase2/ecualizacion_comparacion.png,tambien como estrategia clahe_* en segmentacion.py,completado
+Histogramas,Especificacion de histograma entre origenes,src/psim/histograma.py,figures/fase2/histogram_matching.png,,completado
+Umbralizacion y morfologia,Umbral global fijo,src/psim/segmentacion.py,figures/fase2/dice_por_estrategia.png,,completado
+Umbralizacion y morfologia,Umbral de Otsu,src/psim/segmentacion.py,figures/fase2/dice_por_estrategia.png,,completado
+Umbralizacion y morfologia,Umbral adaptativo local,src/psim/segmentacion.py,figures/fase2/dice_por_estrategia.png,,completado
+Umbralizacion y morfologia,Erosion,src/psim/geometria.py,figures/fase2/morfologia_pasos.png,,completado
+Umbralizacion y morfologia,Dilatacion,src/psim/geometria.py,figures/fase2/morfologia_pasos.png,,completado
+Umbralizacion y morfologia,Apertura morfologica,src/psim/geometria.py,figures/fase2/morfologia_pasos.png,en el flujo del proyecto: refinar en segmentacion.py,completado
+Umbralizacion y morfologia,Cierre morfologico,src/psim/geometria.py,figures/fase2/morfologia_pasos.png,en el flujo del proyecto: refinar en segmentacion.py,completado
+Umbralizacion y morfologia,Transformacion top-hat,src/psim/geometria.py,figures/fase2/tophat_blackhat.png,,completado
+Umbralizacion y morfologia,Transformacion black-hat,src/psim/geometria.py,figures/fase2/tophat_blackhat.png,,completado
+Umbralizacion y morfologia,Relleno de huecos y seleccion de componentes mayores,src/psim/segmentacion.py,results/fase2/conectividad_componentes.csv,"seleccion de componentes en refinar; los huecos del campo no se rellenan por diseno, para no incorporar las axilas",completado
+Dominio de frecuencia,Transformada de Fourier 2D y espectro de magnitud,src/psim/frecuencia.py,figures/fase2/espectros.png,,completado
+Dominio de frecuencia,Filtro pasa-bajas gaussiano,src/psim/frecuencia.py,figures/fase2/pasabajas_comparacion.png,,completado
+Dominio de frecuencia,Filtro pasa-bajas Butterworth,src/psim/frecuencia.py,figures/fase2/pasabajas_comparacion.png,,completado
+Dominio de frecuencia,Filtro pasa-altas,src/psim/frecuencia.py,figures/fase2/pasaaltas.png,,completado
+Dominio de frecuencia,Filtro pasa-banda,src/psim/frecuencia.py,figures/fase2/pasabanda.png,,completado
+Wavelets y multirresolucion,Transformada wavelet continua sobre perfil 1D,src/psim/wavelets.py,figures/fase2/cwt_perfil.png,,completado
+Wavelets y multirresolucion,Descomposicion wavelet discreta 2D,src/psim/wavelets.py,results/fase3/energia_subbandas.csv,"tres niveles db2; en el proyecto, nivel 1 en features.py",completado
+Wavelets y multirresolucion,Reconstruccion inversa por niveles,src/psim/wavelets.py,figures/fase3/reconstruccion_dwt.png,,completado
+Wavelets y multirresolucion,Comparacion de energia por subbanda entre origenes,src/psim/wavelets.py,figures/fase3/energia_wavelets.png,,completado
+Caracteristicas y estadistica,Estadistica descriptiva de intensidad por region,src/psim/eda.py,results/fase2/especificacion_histograma.csv,mediana de intensidad dentro del campo; estadisticos globales en el manifiesto,completado
+Caracteristicas y estadistica,Extraccion de descriptores morfologicos,src/psim/features.py,data/processed/features.csv,,completado
+Caracteristicas y estadistica,Calculo del error relativo frente a la referencia,src/psim/features.py,figures/fase3/error_descriptores.png,,completado
+Caracteristicas y estadistica,Estimacion de la distribucion de los descriptores,scripts/analisis_oe5.py,figures/fase3/distribuciones.png,,completado
+Caracteristicas y estadistica,Prueba de hipotesis entre grupos,src/psim/estadistica.py,results/fase3/oe5_comparacion.csv,"Mann-Whitney, delta de Cliff con bootstrap y Holm",completado
+Modelo estadistico opcional,Regresion logistica sobre descriptores explicitos,scripts/modelado_didactico.py,results/modelado_didactico/test_metrics.csv,no_aplica: la ruta binaria no aplica al proyecto; se desarrollo en la practica comun,no_aplica

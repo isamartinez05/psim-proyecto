@@ -2,8 +2,9 @@
 
 Para cada tecnica de docs/matriz_tecnicas.csv conserva lo prometido en la
 formulacion y registra donde quedo implementada, que producto la evidencia y
-por que cambio, si cambio. Sin argumentos solo audita; con --actualizar agrega
-las columnas archivo_real, producto_real y nota, y actualiza el estado.
+por que cambio, si cambio. Sin argumentos solo audita; con --actualizar
+actualiza el estado en la matriz sin cambiar sus once columnas (seccion 12 de
+la guia) y escribe la implementacion real en matriz_tecnicas_implementacion.csv.
 """
 
 from __future__ import annotations
@@ -16,6 +17,7 @@ from psim import RAIZ
 
 MATRIZ = RAIZ / "docs" / "matriz_tecnicas.csv"
 SALIDA = RAIZ / "results" / "fase3" / "auditoria_matriz.csv"
+IMPLEMENTACION = RAIZ / "docs" / "matriz_tecnicas_implementacion.csv"
 MANIFIESTO = "results/fase1/manifiesto_datos.csv"
 NO_APLICA = "no_aplica"
 
@@ -335,12 +337,13 @@ def main() -> None:
 
     if args.actualizar:
         salida = original.copy()
-        salida["archivo_real"] = m["archivo_real"]
-        salida["producto_real"] = m["producto_real"]
-        salida["nota"] = m["nota"]
         salida["estado"] = m["estado_real"].map(ESTADOS)
         salida.to_csv(MATRIZ, index=False, encoding="utf-8")
-        print(f"\nMatriz actualizada en {MATRIZ.relative_to(RAIZ)}")
+        columnas = ["bloque", "tecnica", "archivo_real", "producto_real", "nota"]
+        implementacion = m[columnas].assign(estado=salida["estado"])
+        implementacion.to_csv(IMPLEMENTACION, index=False, encoding="utf-8")
+        print(f"\nEstado actualizado en {MATRIZ.relative_to(RAIZ)}")
+        print(f"Implementacion real en {IMPLEMENTACION.relative_to(RAIZ)}")
 
 
 if __name__ == "__main__":
