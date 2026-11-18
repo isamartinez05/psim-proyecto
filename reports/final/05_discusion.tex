@@ -1,0 +1,90 @@
+﻿\section{Discusión}
+
+\subsection{Respuesta a la pregunta de investigación}
+
+Las estrategias de preprocesamiento modifican la estabilidad de los descriptores
+de tres maneras distintas: con un sesgo sistemático (compacidad), con un sesgo que
+depende del sitio (relación de aspecto) y con error aleatorio (simetría). Ninguna
+estrategia de realce mejoró la línea base de forma consistente entre sitios. Y el
+efecto no se limita a los valores: según la estrategia, cambian entre
+\FinDiscMin{} y \FinDiscMax{} de las 10 conclusiones entre grupos. El
+preprocesamiento puede cambiar las conclusiones científicas que se extraen de los
+descriptores, no solo sus valores.
+
+\subsection{Coherencia entre análisis independientes}
+
+\begin{itemize}
+    \item \textbf{OE2 y OE3 coinciden.} Las métricas de imagen de OE2 y el Dice de
+    OE3 llegan a la misma conclusión por caminos distintos: el realce no mejora la
+    línea base. Las imágenes tienen poco ruido, y filtrar o realzar cuesta más de
+    lo que aporta.
+    \item \textbf{OE2 explica el efecto de sitio.} La firma espectral de cada origen
+    se concentra en las subbandas vertical y diagonal de escala fina. Eso explica
+    que la energía wavelet difiera entre hospitales, y justifica analizar cada
+    origen por separado y no usar el origen como predictor.
+    \item \textbf{OE4 anticipa OE5.} El tipo de error predice si una conclusión
+    entre grupos sobrevive a la segmentación automática: un sesgo uniforme
+    (compacidad) no la altera; un error que difiere entre grupos o sitios
+    (relación de aspecto) puede borrar una diferencia real o crear una inexistente.
+    \item \textbf{El modelado confirma que el desplazamiento es aprendible.} Los
+    descriptores automáticos contienen información suficiente para estimar la
+    fracción pulmonar de referencia con un error de unos 3 puntos porcentuales, lo
+    que indica un desplazamiento estructurado y no ruido puro.
+\end{itemize}
+
+\subsection{Implicaciones}
+
+El criterio para elegir una segmentación debe depender del uso posterior de los
+descriptores: la estrategia con mejor solapamiento no fue la que mejor preservó las
+comparaciones entre grupos. Toda métrica debe reportarse estratificada por sitio.
+Para comparaciones entre sitios, la relación de aspecto y la simetría son poco
+confiables; la fracción de área y la compacidad, aunque sesgadas, se comportan de
+forma más predecible.
+
+\subsection{Limitaciones}
+
+\begin{enumerate}
+    \item \textbf{Convención de trazado.} Las máscaras de Montgomery excluyen el
+    corazón y los grandes vasos; las de Shenzhen los delimitan. Es un sesgo
+    sistemático entre orígenes que no puede corregirse.
+    \item \textbf{Una sola máscara por imagen.} No se puede medir la variabilidad
+    entre observadores, y por tanto no se sabe si un error de 0,03 en fracción de
+    área es clínicamente relevante.
+    \item \textbf{Sin identificador de paciente.} Se agruparon los dos casos
+    demostrados por referencia cruzada; 90 imágenes de Montgomery comparten sexo y
+    edad con otra sin que eso pruebe identidad.
+    \item \textbf{Dos sitios.} No se puede separar el efecto del detector del
+    protocolo ni de la población, ni el del detector del de la reducción de
+    resolución, porque Shenzhen no documenta el tamaño de píxel. Ningún resultado
+    se verificó en un tercer centro.
+    \item \textbf{Montgomery pequeño y desbalanceado.} Con pocos pacientes por grupo y
+    grupos que difieren en edad y sexo, sus comparaciones son imprecisas y están
+    confundidas.
+    \item \textbf{Energía wavelet.} Anular la imagen fuera de la máscara crea un
+    borde artificial, de modo que el descriptor refleja en parte el contorno.
+    \item \textbf{Parámetros declarados.} Los resultados valen para los parámetros
+    usados; otros límites de CLAHE u otros cortes de frecuencia no se exploraron.
+    \item \textbf{Umbrales convencionales.} El criterio de OE2 (5\,\% y 0,90) y el de
+    estabilidad de OE5 son convenciones fijadas antes de ver los datos. Dos
+    estrategias quedaron a menos de 0,005 del umbral de bordes, y el criterio de
+    estabilidad trata como inestable un cambio de signo entre efectos nulos.
+    \item \textbf{Muestra de OE2.} Las comparaciones de OE2 usan 40 imágenes.
+    \item \textbf{Etiqueta.} Proviene de lecturas clínicas, no de confirmación
+    diagnóstica.
+\end{enumerate}
+
+\subsection{Desviaciones respecto al plan}
+
+\begin{itemize}
+    \item OE2 estaba previsto para las semanas 6 a 11 y se completó en la 14; el
+    cronograma lo registra.
+    \item Dos métricas de OE2 se redefinieron (ruido y conservación de bordes), por
+    las razones expuestas en la sección \ref{sec:met-oe2}.
+    \item La regresión estaba como no planeada; el laboratorio de modelado la exigió
+    y se formuló como pregunta complementaria.
+    \item El análisis exploratorio declaró el filtrado en frecuencia como no
+    pertinente para el flujo; OE2 lo evaluó igual, para cumplir la cobertura
+    comprometida y confirmar esa decisión con datos.
+    \item OE3 se había evaluado solo en entrenamiento; se completó en validación,
+    como pedía la formulación.
+\end{itemize}

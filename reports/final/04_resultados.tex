@@ -1,0 +1,271 @@
+﻿\section{Resultados}
+\label{sec:resultados}
+
+\subsection{Realce, ruido, frecuencia y wavelets (OE2)}
+\label{sec:res-oe2}
+
+\paragraph{Estrategias de realce y filtrado.} De las \FinRealceTotal{} estrategias
+evaluadas sobre la muestra controlada, \textbf{solo \FinRealceConservadas{} cumple el
+criterio de la formulación}: el pasa-bajas gaussiano con corte 0,15 ciclos/píxel,
+por un margen mínimo sobre el umbral de conservación de bordes. Los filtros de
+suavizado eliminan casi todo el ruido estimado a costa de los bordes; el realce
+(\emph{unsharp}, ecualización, CLAHE) conserva los bordes pero amplifica el ruido.
+La mediana 5$\times$5 fue la que mejor equilibró ruido y bordes, y quedó justo por
+debajo del umbral. El ruido de las imágenes originales es menor que un nivel de
+gris en 8 bits: hay poco ruido que quitar.
+
+\input{final_oe2_decision}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{bordes_comparacion.png}
+\caption{Operadores de borde (Sobel, Prewitt, Roberts y Laplaciano) sobre una
+imagen de cada origen.}
+\end{figure}
+
+\paragraph{Firma espectral de cada origen.} La fracción de potencia por encima de
+0,25 ciclos/píxel tiene una mediana de \FinAltaMC{} en Montgomery y \FinAltaSH{} en
+Shenzhen. El delta de Cliff entre orígenes es \FinDeltaEspectro{}: \textbf{separación
+total}, todas las imágenes de Montgomery tienen menos alta frecuencia que todas las
+de Shenzhen. No se puede separar del todo el efecto del detector del de la
+reducción de resolución, porque Shenzhen no documenta el tamaño de píxel.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{espectros.png}
+\caption{Espectro medio de cada origen sobre un recorte central dentro del campo
+(izquierda y centro) y perfil radial de potencia normalizada (derecha).}
+\end{figure}
+
+\paragraph{Energía por subbanda.} La descomposición db2 de tres niveles localiza la
+diferencia: las subbandas \textbf{diagonales} se separan por completo en las tres
+escalas y las \textbf{verticales} de forma marcada, mientras que las
+\textbf{horizontales no difieren}. En una radiografía PA, la energía horizontal
+está dominada por las costillas y el diafragma, la misma anatomía en ambos
+orígenes; las orientaciones vertical y diagonal reflejan sobre todo textura y
+adquisición. La firma del sitio reside en la adquisición, no en la anatomía. Como
+la reducción de resolución afectaría todas las orientaciones por igual, el
+resultado sugiere que la diferencia no se explica solo por ella.
+
+\input{final_oe2_wavelets}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{energia_wavelets.png}
+\caption{Energía relativa por escala y por origen (DWT db2, tres niveles).}
+\end{figure}
+
+\paragraph{Especificación de histograma.} Llevar la distribución de intensidad de
+Montgomery a la de Shenzhen elimina la diferencia de intensidad (delta de
+\FinIntensidadAntes{} a \FinIntensidadDespues{}), pero la alta frecuencia sigue
+separada (delta \FinAltaDespues{}). Se había predicho que la textura no cambiaría,
+por ser una transformación puntual; en realidad cambió en parte, porque la
+transformación no es lineal y estira el contraste local en el rango del
+parénquima. \textbf{El efecto de sitio no se corrige normalizando intensidades.}
+
+\input{final_oe2_especificacion}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{histogram_matching.png}
+\caption{Montgomery antes y después de especificar su histograma hacia Shenzhen.}
+\end{figure}
+
+\paragraph{Geometría.} En las \FinConectN{} imágenes de la muestra, el número de
+componentes de la máscara coincidió con vecindad 4 y 8 en \FinConectIguales{}
+casos: la regla de elegibilidad no depende de esa elección.
+
+\subsection{Segmentación contra la referencia (OE3)}
+\label{sec:res-oe3}
+
+En entrenamiento, \texttt{base\_adap} obtuvo el mayor Dice mediano en ambos
+orígenes, con valores casi iguales entre sitios. Ninguna estrategia con realce
+mejoró la línea base de forma consistente en los dos orígenes.
+
+\input{dice}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{dice_por_estrategia.png}
+\caption{Concordancia por estrategia en entrenamiento. En verde, la línea base.}
+\end{figure}
+
+\paragraph{Criterio de éxito.} La formulación exigía al menos una combinación cuyo
+error relativo mediano mejorara la línea base en tres de los cinco descriptores,
+en ambos orígenes. Ninguna lo cumple; las dos que se acercan fallan por
+inconsistencia entre sitios.
+
+\begin{table}[H]
+\centering
+\small
+\caption{Evaluación del criterio de éxito. Cada estrategia con realce se compara
+con la línea base que comparte umbralización.}
+\begin{tabular}{@{}llccl@{}}
+\toprule
+\textbf{Estrategia} & \textbf{Línea base} & \textbf{Montgomery} & \textbf{Shenzhen} & \textbf{Resultado} \\
+\midrule
+clahe\_adap & base\_adap & 0/5 & 2/5 & no cumple \\
+clahe\_fijo & base\_fijo & 2/5 & 4/5 & no cumple \\
+clahe\_otsu & base\_otsu & 1/5 & 2/5 & no cumple \\
+eq\_adap & base\_adap & 3/5 & 1/5 & no cumple \\
+eq\_fijo & base\_fijo & 0/5 & 2/5 & no cumple \\
+eq\_otsu & base\_otsu & 2/5 & 3/5 & no cumple \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Es un resultado negativo y sustentado. Con un promedio agregado en lugar de exigir
+consistencia en ambos orígenes, \texttt{clahe\_fijo} habría parecido una mejora.
+
+\paragraph{Verificación en validación.} En las imágenes de validación,
+\texttt{base\_adap} mantuvo el primer puesto en ambos orígenes, con Dice mediano de
+\FinDiceValMC{} en Montgomery y \FinDiceValSH{} en Shenzhen (\FinDiceTrainMC{} y
+\FinDiceTrainSH{} en entrenamiento). El ranking de las nueve estrategias coincidió
+con el de entrenamiento salvo un intercambio, de modo que la elección no dependió
+de la muestra. En las comparaciones pareadas fue significativamente superior en
+\FinParesSig{} de \FinParesTotal{} casos; no difirió significativamente de
+\texttt{clahe\_fijo} en ninguno de los orígenes ni de \texttt{eq\_adap} en
+Montgomery. Solo \texttt{base\_adap} es consistente entre sitios: \texttt{eq\_adap}
+queda segunda en Montgomery y sexta en Shenzhen.
+
+\input{final_oe3_ranking}
+\input{final_oe3_pareadas}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{oe3_dice_validacion.png}
+\caption{Dice por estrategia en validación. En rojo, \texttt{base\_adap}.}
+\end{figure}
+
+\subsection{Desplazamiento de los descriptores (OE4)}
+\label{sec:res-oe4}
+
+El preprocesamiento desplaza los descriptores de tres formas distintas, con el
+mismo comportamiento en entrenamiento, validación y prueba:
+
+\begin{itemize}
+    \item \textbf{Sesgo sistemático.} La compacidad automática es menor que la de
+    referencia en prácticamente todas las imágenes, cerca de un \FinSesgoCompacidad\,\%
+    menor. El umbral deja bordes dentados donde el trazado humano es suave, y un
+    borde dentado tiene muchos más píxeles de perímetro. La fracción de área y la
+    energía wavelet se sobreestiman en la mayoría de las imágenes.
+    \item \textbf{Sesgo dependiente del sitio.} La relación de aspecto se sobreestima
+    en Shenzhen y casi no en Montgomery. Es la inestabilidad más grave para la
+    pregunta, que pide mediciones reproducibles entre sitios.
+    \item \textbf{Error aleatorio.} La simetría no tiene dirección (cerca de la mitad
+    de las imágenes sobreestimadas), pero su error es del orden de la propia medida.
+    Su error relativo explota cuando la referencia es casi cero, por lo que se
+    reporta la diferencia absoluta.
+\end{itemize}
+
+\input{final_oe4}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{error_descriptores_particiones.png}
+\caption{Error relativo con signo de cada descriptor de \texttt{base\_adap} por
+partición y origen. Positivo: la segmentación automática sobreestima.}
+\end{figure}
+
+Por estrategia, en entrenamiento, la relación de aspecto es el descriptor más
+estable y la simetría el menos estable:
+
+\input{errores}
+
+\subsection{Diferencias entre grupos (OE5)}
+\label{sec:res-oe5}
+
+Se analizaron \FinPacientesOECinco{} pacientes. Con la máscara de referencia, en
+Shenzhen \textbf{\FinOECincoSigSH{} descriptores difieren} entre radiografías con y
+sin hallazgos, con efectos moderados: el campo pulmonar con hallazgos es más
+alargado, ocupa más fracción del campo, es menos compacto y tiene menos energía de
+detalle fino. En Montgomery ninguno es significativo tras la corrección. Son
+asociaciones morfométricas, no criterios diagnósticos.
+
+\input{final_oe5_referencia}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{oe5_delta_cliff.png}
+\caption{Delta de Cliff entre grupos con intervalo bootstrap al 95\,\%, con la
+máscara de referencia y con la segmentación automática.}
+\end{figure}
+
+\paragraph{Confusión.} En Shenzhen los grupos son comparables en edad y sexo; en
+Montgomery el grupo con hallazgos es mayor y tiene más hombres, de modo que
+cualquier diferencia allí estaría confundida, además de tener poca potencia.
+
+\input{final_oe5_covariables}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{distribuciones.png}
+\caption{Distribución de los descriptores de referencia por grupo y origen, un
+punto por paciente.}
+\end{figure}
+
+\paragraph{Sensibilidad a la segmentación.} Con los descriptores automáticos,
+\FinEstables{} de \FinEstabilidadTotal{} conclusiones se mantienen. La compacidad
+ilustra el caso más claro: su sesgo es enorme, pero su diferencia entre grupos es
+casi idéntica con ambas máscaras, porque \textbf{un sesgo uniforme no altera la
+comparación entre grupos}. En cambio, la relación de aspecto pierde en Shenzhen una
+diferencia presente en la referencia, y en Montgomery aparece una diferencia
+significativa que la referencia no muestra: su error no es igual en los dos grupos.
+
+\input{final_oe5_estabilidad}
+
+Con las nueve estrategias, cada una cambia entre \FinDiscMin{} y \FinDiscMax{} de
+las 10 conclusiones respecto a la referencia; \texttt{base\_adap} cambia
+\FinDiscBaseAdap{}. \textbf{Ninguna estrategia es inocua}, y la de mejor Dice no es
+la que mejor preserva las conclusiones. En Shenzhen la segmentación tiende a borrar
+diferencias reales; en Montgomery, a crear diferencias que la referencia no
+muestra.
+
+\input{final_oe5_estrategias}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{oe5_estrategias_train.png}
+\caption{Delta de Cliff por estrategia, descriptor y origen en entrenamiento.
+Asterisco: significativo tras Holm. Recuadro: no coincide con la referencia.}
+\end{figure}
+
+\subsection{Modelado supervisado}
+\label{sec:res-modelo}
+
+En validación, el modelo de grado 2 obtuvo el menor RMSE (\ModRMSEValDos{}), frente
+a \ModRMSEValUno{} del grado 1 y \ModRMSEValBase{} de la media de entrenamiento. Su
+ventaja sobre el grado 1 es modesta. La matriz de diseño tiene rango completo
+(\ModRangoDiseno{}) y número de condición \ModCondicion{}: los coeficientes son
+identificables.
+
+\input{lab005_validacion}
+
+En la prueba, evaluada una sola vez con el modelo congelado, el RMSE fue
+\FinRMSE{} (IC 95\,\% \FinRMSEInf{} a \FinRMSESup{}), frente a \FinRMSEMedia{} de la
+media de entrenamiento: una reducción del \FinReduccion\,\% (\FinReduccionInf{} a
+\FinReduccionSup\,\%), con $R^2 = \ModRTest{}$. El intervalo de la reducción no
+incluye el cero, y el desempeño coincide con el de validación. El error en
+Montgomery es más alto, pero su intervalo, amplio por tener \ModNTestMC{} pacientes,
+se superpone con el de Shenzhen.
+
+\input{final_bootstrap}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{prueba_prediccion_residuos.png}
+\caption{Prueba: referencia frente a predicción y residuos. Las fracciones
+extremas regresan a la media.}
+\end{figure}
+
+\input{lab005_coeficientes}
+
+\paragraph{Práctica común.} Con datos sintéticos, el modelo de \DidModeloReg{}
+recuperó el término cuadrático del mecanismo (RMSE de prueba \DidRMSETestReg{}
+frente a \DidRMSETestBase{} de la referencia). La regresión logística alcanzó un
+ROC-AUC de \DidAUCTest{} y un AP de \DidAPTest{} frente a una prevalencia de
+\DidPrevTest{}, pero con umbral 0,5 su sensibilidad fue \DidSensTest{}: el umbral
+es una decisión de costos que debe fijarse en validación.
+
+\input{lab005_didactico_reg}
+\input{lab005_didactico_bin}

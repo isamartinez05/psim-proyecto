@@ -1,0 +1,77 @@
+% Informe final integrado del proyecto PSIM
+% Compilar desde la raiz:
+% latexmk -pdf -interaction=nonstopmode -halt-on-error -outdir=build/reports reports/informe_final.tex
+
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish]{babel}
+\usepackage{lmodern}
+\usepackage{geometry}
+\geometry{left=2.6cm,right=2.6cm,top=2.8cm,bottom=2.6cm,headheight=1.4cm}
+\usepackage{setspace}
+\onehalfspacing
+
+\usepackage{hyperref}
+\hypersetup{colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue}
+\usepackage{graphicx}
+\usepackage{fancyhdr}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{caption}
+\usepackage{float}
+\usepackage{longtable}
+\usepackage{array}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\includegraphics[height=0.95cm]{Escuela_Rosario_logo.png}}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0pt}
+
+\makeatletter
+\providecommand{\input@path}{}
+\edef\input@path{{reports/}{reports/final/}{reports/tablas/}{./}}
+\makeatother
+\graphicspath{{reports/}{figures/fase1/}{figures/fase2/}{figures/fase3/}{figures/modelado_proyecto/}{results/modelado_didactico/}{./}}
+
+\input{final_cifras}
+\input{lab005_cifras}
+
+\newcommand{\tituloTrabajo}{Estabilidad de los descriptores morfológicos del campo pulmonar}
+\newcommand{\subtituloTrabajo}{Efecto de las estrategias de preprocesamiento y segmentación en radiografías de tórax de dos sitios de adquisición. Informe final integrado}
+
+\begin{document}
+
+\thispagestyle{empty}
+\begin{titlepage}
+    \centering
+    {\LARGE \textbf{\tituloTrabajo}}\\[0.6cm]
+    {\large \subtituloTrabajo}\\[2cm]
+    {\large \textbf{Juanita Trujillo Narváez}. Cód: 1000099467}\\
+    {\large \textbf{Karol Isabella Martínez Villarreal}. Cód: 1000099682}\\[1cm]
+    {\large Ingeniería Biomédica}\\[0.4cm]
+    {\large PSIM - 2026II - 80}\\
+    Docente: Ing. Pablo Eduardo Caicedo-Rodríguez, Ph.D.
+    \vfill
+    Fecha de entrega: \today
+\end{titlepage}
+
+\tableofcontents
+\newpage
+
+\input{00_resumen}
+\input{01_introduccion}
+\input{02_radiografia_datos}
+\input{03_metodos}
+\input{04_resultados}
+\input{05_discusion}
+\input{06_reproducibilidad}
+\input{07_conclusiones}
+
+\appendix
+\input{a1_laboratorios}
+\input{a2_matriz}
+
+\end{document}

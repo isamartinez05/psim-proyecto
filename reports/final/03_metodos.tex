@@ -1,0 +1,289 @@
+﻿\section{Métodos}
+\label{sec:metodos}
+
+\subsection{Flujo general}
+
+Todo el procesamiento es clásico y determinista: ningún paso de la segmentación
+ajusta parámetros a partir de etiquetas. Cada imagen recorre la misma cadena:
+
+\begin{enumerate}
+    \item \textbf{Lectura} sin alterar valores; reducción a un canal verificada.
+    \item \textbf{Reducción} a un lado de trabajo de 512 píxeles.
+    \item \textbf{Campo irradiado}: región con señal del detector.
+    \item \textbf{Realce} (ninguno, ecualización global o CLAHE).
+    \item \textbf{Umbralización} (fija, Otsu o adaptativa).
+    \item \textbf{Morfología fija}: cierre, relleno de huecos, apertura y selección
+    de las dos componentes mayores.
+    \item \textbf{Descriptores} sobre la máscara obtenida y sobre la de referencia.
+    \item \textbf{Comparación}: Dice, Jaccard y error de cada descriptor.
+\end{enumerate}
+
+Todos los análisis respetan la partición congelada por paciente. Los que
+eligen algo (estrategia, predictores, modelo) lo hacen con entrenamiento o
+validación, nunca con la prueba.
+
+\subsection{Región de interés: el campo irradiado}
+
+Montgomery entrega siempre 4020 por 4892 píxeles con independencia de la
+colimación, y el área no irradiada queda como negro puro. Dividir el área pulmonar
+por el área de la imagen mediría la apertura del colimador, no la anatomía. Un
+recorte rectangular no basta: deja entre el 20 y el 32\,\% de fondo, porque el
+área irradiada no es rectangular.
+
+El campo irradiado se obtiene por umbral sobre el nivel de fondo (8) y selección de
+la componente conexa mayor, \textbf{sin relleno de huecos ni cierre}: las axilas
+atenúan tan poco que se registran al nivel del fondo, y rellenarlas haría que el
+denominador midiera el colimador y no el cuerpo. Sobre esta región se calculan el
+histograma, el umbral de segmentación y el denominador de la fracción de área.
+
+
+\subsection{Estrategias de segmentación (OE3)}
+\label{sec:met-oe3}
+
+Se comparan nueve combinaciones de tres realces y tres umbralizaciones. La
+morfología es la misma en todas, para que una diferencia de resultado pueda
+atribuirse al realce o al umbral.
+
+\begin{table}[H]
+\centering
+\small
+\caption{Componentes de las nueve estrategias y sus parámetros}
+\begin{tabular}{@{}p{3.4cm}p{3.6cm}p{6.6cm}@{}}
+\toprule
+\textbf{Etapa} & \textbf{Opción} & \textbf{Parámetros} \\
+\midrule
+Realce & \texttt{base} & Sin realce (línea base) \\
+       & \texttt{eq} & Ecualización global por función acumulada \\
+       & \texttt{clahe} & CLAHE, límite de recorte 0,02, rejilla de 8 \\
+\addlinespace
+Umbral & \texttt{fijo} & Percentil 35 de la intensidad del campo \\
+       & \texttt{otsu} & Umbral de Otsu sobre el campo \\
+       & \texttt{adap} & Adaptativo local, bloque de 0,25 del lado \\
+\addlinespace
+Morfología (fija) & --- & Cierre (0,020 del lado), relleno de huecos, apertura
+(0,012 del lado) y dos componentes mayores \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Una estrategia se nombra \texttt{realce\_umbral}; por ejemplo, \texttt{base\_adap}
+es sin realce y umbral adaptativo. La concordancia con la referencia se mide con:
+\begin{equation}
+\mathrm{Dice}(A,B) = \frac{2\,|A \cap B|}{|A| + |B|}, \qquad
+\mathrm{Jaccard}(A,B) = \frac{|A \cap B|}{|A \cup B|}.
+\end{equation}
+Una segmentación es \emph{elegible} si la imagen fue aceptada y la máscara tiene
+exactamente dos componentes, una por pulmón.
+
+La estrategia se eligió en entrenamiento por Dice mediano y consistencia entre
+orígenes. En esta fase se verificó en validación: Dice por imagen de las nueve
+estrategias en las 110 imágenes con máscara, ranking por origen, y comparación
+pareada de la elegida frente a cada otra con la prueba de rangos con signo de
+Wilcoxon y corrección de Holm sobre las 16 comparaciones.
+
+\subsection{Descriptores}
+\label{sec:met-descriptores}
+
+Los cinco descriptores son adimensionales, porque Shenzhen no documenta el
+espaciado de píxel. Se calculan igual sobre la máscara obtenida y sobre la de
+referencia, y ninguna función recibe la etiqueta clínica.
+
+\begin{table}[H]
+\centering
+\small
+\caption{Definición de los descriptores}
+\begin{tabular}{@{}p{3.5cm}p{4.6cm}p{5.6cm}@{}}
+\toprule
+\textbf{Descriptor} & \textbf{Fórmula} & \textbf{Qué mide} \\
+\midrule
+Compacidad & $C = \dfrac{4\pi A}{P^2}$ & Regularidad del contorno: menor cuanto
+más irregular \\
+\addlinespace
+Relación de aspecto & $R = \dfrac{\text{alto}}{\text{ancho}}$ de la caja envolvente &
+Proporción vertical frente a horizontal del campo pulmonar \\
+\addlinespace
+Fracción de área & $F = \dfrac{A_{\text{pulmón}}}{A_{\text{campo}}}$ & Proporción
+del campo irradiado ocupada por pulmón \\
+\addlinespace
+Simetría izq-der & $S = \dfrac{|A_i - A_d|}{A_i + A_d}$ & Diferencia de área entre
+los dos campos; cero si son iguales \\
+\addlinespace
+Energía wavelet & $E = \dfrac{1}{n}\sum_{R} \left(c_H^2 + c_V^2 + c_D^2\right)$ &
+Energía media de los detalles de primer nivel (db2) dentro de la región \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Detalles de cálculo que condicionan la interpretación:
+
+\begin{itemize}
+    \item \textbf{Perímetro.} $P$ se cuenta como los píxeles que la región pierde al
+    erosionarla con vecindad 4. Sobre una rejilla discreta, un disco da $C \approx
+    1{,}24$ y no 1. El sesgo es el mismo para la máscara obtenida y la de
+    referencia, de modo que su comparación es interpretable. Un borde dentado
+    tiene muchos más píxeles de borde, y por eso reduce la compacidad.
+    \item \textbf{Campos izquierdo y derecho.} Si la máscara tiene dos componentes,
+    se ordenan por la posición horizontal de su centroide; si tiene una sola, se
+    parte por la mitad de su extensión horizontal. Por convención radiológica, el
+    pulmón izquierdo del paciente queda a la derecha de la imagen.
+    \item \textbf{Energía wavelet.} La imagen se normaliza a $[0,1]$, se anula fuera
+    de la región y se descompone con la wavelet db2 en un nivel. La energía de
+    los tres detalles se promedia sobre los $n$ coeficientes dentro de la región
+    reducida. Anular el exterior crea un borde artificial en el contorno, que
+    aporta energía de detalle: el descriptor refleja en parte el contorno de la
+    máscara y no solo la textura del parénquima.
+\end{itemize}
+
+El error de cada descriptor frente a su referencia se expresa como error relativo
+con signo:
+\begin{equation}
+e = \frac{d_{\text{obtenido}} - d_{\text{referencia}}}{|d_{\text{referencia}}|}.
+\end{equation}
+Un valor negativo indica que la segmentación automática subestima el descriptor.
+
+\subsection{Realce, ruido, frecuencia y wavelets (OE2)}
+\label{sec:met-oe2}
+
+OE2 se evaluó sobre una \textbf{muestra controlada} de 40 imágenes de
+entrenamiento: 10 por cada combinación de origen y clase, con semilla fija. Cada
+estrategia se mide con tres métricas dentro del campo irradiado:
+
+\begin{itemize}
+    \item \textbf{Contraste RMS}: desviación estándar de la intensidad.
+    \item \textbf{Ruido estimado}: desviación del ruido estimada por la mediana
+    absoluta de los coeficientes wavelet de escala fina.
+    \item \textbf{Conservación de bordes}: correlación entre las magnitudes de Sobel
+    de la imagen original y la procesada.
+\end{itemize}
+
+El criterio de la formulación (conservar una estrategia solo si mejora al menos una
+métrica sin degradar las otras) se volvió operativo con umbrales fijados antes de
+ver resultados: el contraste se degrada si baja más del 5\,\%, el ruido si sube más
+del 5\,\%, y los bordes si su conservación cae por debajo de 0,90.
+
+\paragraph{Cambios respecto a la formulación.} La formulación definía el ruido
+como la desviación estándar del fondo, pero el fondo de Montgomery es relleno negro
+puro y daría cero; se usó el estimador por wavelets. La conservación de bordes se
+definió como correlación de gradientes en todo el campo, y no como razón sobre el
+contorno de referencia, para no depender de la máscara manual.
+
+Las estrategias se agruparon en cinco lotes:
+
+\begin{enumerate}
+    \item \textbf{Espacial}: media 5$\times$5, mediana 5$\times$5, gaussiano
+    ($\sigma = 1{,}5$) y \emph{unsharp masking}; operadores de Sobel, Prewitt,
+    Roberts, Laplaciano y \emph{emboss}.
+    \item \textbf{Frecuencia}: pasa-bajas gaussiano y Butterworth (corte 0,15
+    ciclos/píxel, orden 2), pasa-altas (0,05) y pasa-banda (0,03 a 0,15). La
+    firma de cada origen se midió como la fracción de potencia por encima de 0,25
+    ciclos/píxel, sobre un recorte central de 192 píxeles dentro del campo con
+    ventana de Hann, para que el relleno negro no contaminara el espectro.
+    \item \textbf{Wavelets}: descomposición db2 de tres niveles sobre el mismo
+    recorte, con la energía relativa de cada subbanda (A3 y H, V, D de cada nivel),
+    y transformada continua (sombrero mexicano) sobre un perfil horizontal.
+    \item \textbf{Intensidad}: especificación del histograma de Montgomery hacia
+    una referencia de Shenzhen dentro del campo, ecualización global, CLAHE
+    (límite 0,01), transformaciones puntuales y requantización.
+    \item \textbf{Geometría}: conectividad 4 y 8, transformada de distancia, pasos
+    de la morfología y \emph{top-hat} / \emph{black-hat}.
+\end{enumerate}
+
+Las diferencias entre orígenes se cuantificaron con el delta de Cliff y su
+intervalo bootstrap, con corrección de Holm cuando hubo varias pruebas.
+
+\subsection{Desplazamiento de los descriptores (OE4)}
+\label{sec:met-oe4}
+
+Se calculó el error con signo de cada descriptor de \texttt{base\_adap} frente a
+su referencia, en las imágenes elegibles de las tres particiones, y se resumió por
+descriptor, partición y origen con la mediana del error con signo (sesgo), la
+mediana del error absoluto (magnitud), su intervalo intercuartílico y el porcentaje
+de imágenes sobreestimadas. Para la simetría, cuyo valor de referencia puede ser
+casi cero, se reporta además la diferencia absoluta, porque el error relativo
+explota cuando el denominador tiende a cero.
+
+\subsection{Diferencias entre grupos (OE5)}
+\label{sec:met-oe5}
+
+El protocolo se congeló en \texttt{config/analisis\_oe5.json} antes de ver
+resultados, con los hashes de las tablas que se iban a analizar.
+
+\begin{itemize}
+    \item \textbf{Unidad}: el paciente; las imágenes de un mismo paciente se
+    promedian.
+    \item \textbf{Población}: pacientes elegibles de \texttt{base\_adap} en las tres
+    particiones. OE5 no selecciona ningún modelo, de modo que no requiere una
+    partición reservada.
+    \item \textbf{Estratos}: Shenzhen y Montgomery por separado, por el efecto de
+    sitio.
+    \item \textbf{Prueba}: Mann-Whitney $U$ bilateral, que no supone normalidad.
+    \item \textbf{Tamaño de efecto}: delta de Cliff,
+    \begin{equation}
+    \delta = P(X > Y) - P(X < Y) = \frac{2U}{n_1 n_2} - 1,
+    \end{equation}
+    entre $-1$ y $1$, positivo si el grupo con hallazgos tiende a valores mayores,
+    con intervalo bootstrap percentil al 95\,\% (2000 réplicas por paciente).
+    \item \textbf{Comparaciones múltiples}: Holm sobre las 10 pruebas
+    (5 descriptores por 2 orígenes), $\alpha = 0{,}05$.
+\end{itemize}
+
+El análisis principal usa los descriptores de la máscara de referencia. Como
+sensibilidad se repitió con los descriptores automáticos de los mismos pacientes y
+con las nueve estrategias en entrenamiento. Una conclusión se considera
+\emph{estable} si referencia y automática coinciden en la decisión tras Holm y en
+el signo del delta.
+
+\subsection{Modelado supervisado}
+\label{sec:met-modelo}
+
+La formulación no planeaba un modelo predictivo, porque la pregunta es descriptiva.
+El laboratorio de modelado del curso lo exigió, y se formuló una pregunta
+complementaria: si los descriptores automáticos permiten estimar la fracción
+pulmonar de la máscara manual en pacientes no vistos.
+
+\begin{table}[H]
+\centering
+\small
+\caption{Contrato de modelado (\texttt{config/modelado\_lab005.json})}
+\begin{tabular}{@{}p{4cm}p{9.6cm}@{}}
+\toprule
+Unidad & Paciente (\texttt{grupo\_id}) \\
+Salida & \texttt{ref\_fraccion\_area}, de la máscara manual \\
+Predictores & \texttt{fraccion\_area}, \texttt{energia\_wavelet\_d1} y
+\texttt{simetria\_izq\_der}, de la máscara automática \\
+Excluidos & Toda columna \texttt{ref\_} o \texttt{err\_}, Dice, Jaccard,
+identificadores, origen y etiqueta clínica \\
+Pacientes & \ModNTrain{} en entrenamiento, \ModNVal{} en validación y \ModNTest{} en
+prueba \\
+Métrica primaria & RMSE \\
+Referencia sencilla & Media de entrenamiento \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Los predictores se eligieron solo con entrenamiento: asociación con el objetivo,
+mismo signo en ambos orígenes y redundancia baja entre ellos. Con $z_j$ el
+predictor estandarizado con la media y la desviación de entrenamiento, se
+compararon:
+\begin{align}
+\text{Grado 1:}\quad \hat{y} &= \beta_0 + \sum_{j} \beta_j z_j, \\
+\text{Grado 2:}\quad \hat{y} &= \beta_0 + \sum_{j} \beta_j z_j
+  + \sum_{j \le k} \beta_{jk}\, z_j z_k .
+\end{align}
+El grado 2 es no lineal en los predictores y lineal en los coeficientes, que se
+estiman por mínimos cuadrados. La imputación, el escalamiento y la expansión se
+ajustan dentro de un \emph{pipeline} solo con entrenamiento. El candidato se eligió
+por menor RMSE de validación, el protocolo se congeló y la prueba se extrajo y
+evaluó una sola vez. La incertidumbre del error en prueba se estimó con un
+bootstrap de 2000 réplicas por paciente, con el modelo fijo.
+
+\paragraph{Práctica común.} Con datos sintéticos de mecanismo conocido se
+desarrollaron las dos rutas del laboratorio: regresión de grados 1 y 2 y
+regresión logística,
+\begin{equation}
+P(y = 1 \mid z) = \frac{1}{1 + e^{-(\beta_0 + \beta^\top z)}},
+\end{equation}
+ajustada minimizando la pérdida logarítmica con penalización L2 de intensidad
+inversa $C$ (solucionador L-BFGS), con $C \in \{0{,}1;\ 1\}$ y umbral de decisión
+0,5. La ruta binaria no aplica al proyecto: no formula detección de tuberculosis, y
+la etiqueta es variable de control.

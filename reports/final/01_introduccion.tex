@@ -1,0 +1,91 @@
+\section{Introducción}
+
+\subsection{Problema}
+
+La delimitación del campo pulmonar precede a toda medición morfológica en una
+radiografía de tórax. Su resultado depende del detector, de la exposición, del
+procesamiento de la imagen y de los hallazgos que opacifican el parénquima. Si la
+máscara obtenida se desplaza según la estrategia de preprocesamiento, los
+descriptores calculados sobre ella heredan esa variabilidad y dejan de ser
+comparables entre sujetos o entre sitios de adquisición, aunque la anatomía no haya
+cambiado.
+
+Las técnicas del curso permiten cuantificar ese efecto de manera controlada:
+aplicar estrategias alternativas de realce, umbralización y morfología, medir su
+concordancia con máscaras trazadas por personas y estimar cuánto se desplaza cada
+descriptor respecto a su valor de referencia.
+
+\subsection{Pregunta de investigación}
+
+\begin{quote}
+¿En qué medida las estrategias de realce de intensidad, umbralización y morfología
+modifican la estabilidad de los descriptores morfológicos del campo pulmonar
+(compacidad, relación de aspecto, fracción de área, simetría izquierda-derecha y
+energía wavelet), respecto a los descriptores obtenidos sobre la máscara de
+referencia, en radiografías de tórax de los conjuntos Montgomery y Shenzhen?
+\end{quote}
+
+\subsection{Objetivos}
+
+\textbf{Objetivo general.} Evaluar el efecto de las estrategias de normalización,
+realce, umbralización y morfología sobre la estabilidad de los descriptores
+morfológicos del campo pulmonar, mediante la comparación cuantitativa con los
+descriptores derivados de máscaras de referencia, para determinar qué combinación
+de técnicas produce mediciones reproducibles entre sitios de adquisición.
+
+\begin{table}[H]
+\centering
+\small
+\caption{Objetivos específicos, fase y sección de este informe}
+\begin{tabular}{@{}p{0.9cm}p{9.6cm}cc@{}}
+\toprule
+\textbf{OE} & \textbf{Objetivo} & \textbf{Fase} & \textbf{Sección} \\
+\midrule
+OE1 & Caracterizar la digitalización y adquisición de ambos conjuntos: resolución,
+      cuantización, canales e intensidades & 1 & \ref{sec:caracterizacion} \\
+OE2 & Comparar estrategias de normalización y reducción de ruido en dominio
+      espacial y de frecuencia sobre una muestra controlada & 1--2 & \ref{sec:res-oe2} \\
+OE3 & Comparar estrategias de segmentación del campo pulmonar contra las máscaras
+      de referencia & 2 & \ref{sec:res-oe3} \\
+OE4 & Cuantificar el desplazamiento de cada descriptor respecto a su valor de
+      referencia & 2--3 & \ref{sec:res-oe4} \\
+OE5 & Analizar las diferencias entre grupos con y sin hallazgos y documentar las
+      limitaciones & 3 & \ref{sec:res-oe5} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Además, el laboratorio de modelado supervisado agregó una pregunta predictiva:
+si los descriptores de la segmentación automática permiten estimar la fracción
+pulmonar de la máscara manual en pacientes no vistos (sección \ref{sec:res-modelo}).
+
+\subsection{Alcance}
+
+El proyecto caracteriza y compara; \textbf{no detecta ni diagnostica tuberculosis}.
+La etiqueta clínica se usa solo para comparar grupos (OE5). No propone un método
+superior al estado del arte, no evalúa observadores humanos y no generaliza sus
+resultados a otras modalidades ni a otras proyecciones.
+
+\subsection{Organización del trabajo}
+
+El proyecto se desarrolló en tres fases a lo largo de quince semanas, y cada
+laboratorio del curso extendió el mismo repositorio:
+
+\begin{table}[H]
+\centering
+\small
+\caption{Correspondencia entre los laboratorios y este informe}
+\begin{tabular}{@{}p{5.2cm}p{6.4cm}c@{}}
+\toprule
+\textbf{Laboratorio} & \textbf{Producto principal} & \textbf{Sección} \\
+\midrule
+Formulación del proyecto & Pregunta, objetivos, datos, matriz y cronograma & 1 \\
+Caracterización (Fase 1) & Manifiesto, calidad y partición & 2 \\
+Análisis exploratorio y tabla de características & Nueve estrategias y tabla de
+descriptores & 3 y 4 \\
+Modelado supervisado & Regresión múltiple con protocolo congelado & 4 \\
+Fase 3: OE2 a OE5 & Realce, frecuencia, wavelets, desplazamiento y grupos & 4 \\
+Laboratorios preparatorios del curso & Entorno reproducible y adquisición & Anexo A \\
+\bottomrule
+\end{tabular}
+\end{table}

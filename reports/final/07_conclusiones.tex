@@ -1,0 +1,31 @@
+﻿\section{Conclusiones}
+
+\begin{enumerate}
+    \item Los dos orígenes difieren más por su adquisición que por la clase de las
+    imágenes. Su firma espectral está separada por completo y se concentra en la
+    textura de escala fina (subbandas vertical y diagonal), no en la anatomía.
+    \item Ninguna estrategia de realce mejoró la segmentación ni la imagen de forma
+    consistente; \texttt{base\_adap}, sin realce, tuvo el mejor Dice en ambos
+    orígenes, en entrenamiento y en validación.
+    \item La segmentación desplaza los descriptores con tres tipos de error: sesgo
+    sistemático, sesgo por sitio y error aleatorio. La relación de aspecto y la
+    simetría son las menos reproducibles entre sitios.
+    \item Con la máscara de referencia, \FinOECincoSigSH{} descriptores difieren entre
+    grupos en Shenzhen; ninguno en Montgomery. Según la estrategia de segmentación
+    cambian entre \FinDiscMin{} y \FinDiscMax{} de las 10 conclusiones: el
+    preprocesamiento puede alterar las conclusiones científicas.
+    \item Los descriptores automáticos estiman la fracción pulmonar de referencia en
+    pacientes nuevos con un RMSE de \FinRMSE{} (IC 95\,\% \FinRMSEInf{} a
+    \FinRMSESup{}), un \FinReduccion\,\% menos que la media de entrenamiento.
+\end{enumerate}
+
+\subsection{Trabajo futuro}
+
+Comparar el error con la variabilidad entre observadores, para saber si es
+clínicamente relevante; verificar los resultados en un tercer centro; usar máscaras
+de referencia con una misma convención de trazado; y explorar otros parámetros de
+realce y de filtrado.
+
+\nocite{*}
+\bibliographystyle{plain}
+\bibliography{referencias}

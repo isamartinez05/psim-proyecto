@@ -1,0 +1,172 @@
+\section{La radiografía de tórax y los datos}
+
+\subsection{Cómo se forma una radiografía}
+
+Una radiografía es una \textbf{proyección}: registra en un plano la atenuación
+acumulada de un haz de rayos X que atraviesa todo el tórax~\cite{prince2015}. El
+haz se produce en un tubo en el que electrones acelerados por una diferencia de
+potencial (kVp) frenan contra un ánodo; la corriente y el tiempo de exposición
+(mAs) fijan la cantidad de fotones.
+
+Al atravesar un material de coeficiente de atenuación $\mu$ y espesor $x$, la
+intensidad decae según la ley de Beer-Lambert:
+\begin{equation}
+I = I_0 \, e^{-\mu x}.
+\end{equation}
+El coeficiente $\mu$ crece con la densidad y el número atómico. El hueso y el
+mediastino atenúan mucho; el aire del parénquima pulmonar, casi nada. La imagen se
+representa de modo que las regiones de \textbf{alta atenuación se ven claras}
+(hueso, corazón, mediastino) y las de \textbf{baja atenuación, oscuras} (campos
+pulmonares). Parte de los fotones se dispersa y degrada el contraste; por eso se
+usa una rejilla antidispersión.
+
+El detector convierte la intensidad que llega en una señal digital cuantizada. Los
+dos conjuntos usan tecnologías distintas:
+
+\begin{itemize}
+    \item \textbf{Radiografía computarizada (CR)}, en Montgomery: una placa de
+    fósforo fotoestimulable almacena la imagen latente, que luego se lee con un
+    láser y se digitaliza.
+    \item \textbf{Radiografía digital directa (DR)}, en Shenzhen: un panel plano
+    convierte los rayos X en señal digital sin paso intermedio.
+\end{itemize}
+
+La respuesta de contraste y la estructura del ruido difieren entre ambas, de modo
+que un mismo procesamiento no produce el mismo resultado en los dos orígenes. Esa
+diferencia es la condición de comparación del proyecto.
+
+\subsection{Protocolo posteroanterior (PA)}
+
+Todas las imágenes son radiografías de tórax en proyección PA. La tabla resume el
+protocolo estándar; los conjuntos no documentan los parámetros de cada exposición.
+
+\begin{table}[H]
+\centering
+\small
+\caption{Elementos del protocolo estándar de la radiografía de tórax PA}
+\begin{tabular}{@{}p{4cm}p{9.6cm}@{}}
+\toprule
+\textbf{Elemento} & \textbf{Descripción y motivo} \\
+\midrule
+Dirección del haz & De la espalda (posterior) al pecho (anterior), con el tórax
+apoyado en el detector \\
+Posición & De pie, con los hombros rotados hacia adelante para retirar las
+escápulas de los campos pulmonares \\
+Distancia foco-detector & Alrededor de 180 cm: reduce la magnificación y la
+distorsión geométrica \\
+Respiración & Inspiración profunda sostenida: expande los pulmones y desciende el
+diafragma \\
+Técnica & Alto kilovoltaje, para atravesar el mediastino y equilibrar el contraste
+entre hueso y pulmón \\
+Rejilla & Antidispersión, para conservar el contraste \\
+Ventaja frente a AP & El corazón queda cerca del detector y se magnifica menos \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+En la imagen se distinguen las clavículas, las costillas (bandas casi horizontales
+que cruzan los campos), la columna, el corazón y el mediastino en el centro, los
+hemidiafragmas abajo y los dos \textbf{campos pulmonares}, que son la región que
+segmenta este proyecto.
+
+\subsection{Conjuntos de datos}
+
+Se usaron dos conjuntos públicos de la U.S. National Library of
+Medicine~\cite{jaeger2014}: \textbf{Montgomery County Chest X-ray Set} (Estados
+Unidos, \FinNMC{} imágenes) y \textbf{Shenzhen Hospital Chest X-ray Set} (China,
+\FinNSH{} imágenes), en total \FinNImagenes{} radiografías, de las cuales
+\FinNConMascara{} tienen máscara de referencia. La etiqueta (con o sin hallazgos de
+tuberculosis) proviene de las lecturas clínicas que acompañan cada imagen.
+
+\input{final_datos}
+
+\paragraph{Por qué dos conjuntos.} En la formulación se compararon cuatro
+candidatos (JSRT, Montgomery, Shenzhen y CheXmask). Ningún conjunto individual
+permite responder la pregunta, porque todos provienen de un solo sitio y la
+pregunta pide mediciones reproducibles \emph{entre} sitios. JSRT se descartó por
+riesgo de acceso, y CheXmask por razones metodológicas: sus máscaras las generó una
+red neuronal, y usarlas como referencia invalidaría la comparación contra un
+trazado humano.
+
+\paragraph{Máscaras de referencia.} Montgomery entrega dos archivos booleanos por
+imagen, uno por pulmón, trazados bajo supervisión de radiólogo~\cite{candemir2014}.
+Las de Shenzhen provienen del Instituto Politécnico de Kiev~\cite{stirenko2018}:
+un archivo de 512 por 512 píxeles con bordes suavizados, que se reescala por vecino
+más cercano y se binariza en 128. Las dos procedencias siguen convenciones
+distintas: \textbf{las de Montgomery excluyen el corazón y los grandes vasos; las
+de Shenzhen los delimitan}. Es un sesgo sistemático entre orígenes que no puede
+corregirse, y es la principal limitación del estudio.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{galeria_entrenamiento.png}
+\caption{Galería de la cohorte de entrenamiento: las dos clases y los dos
+orígenes, los extremos de resolución, un paciente pediátrico y un caso marcado
+para revisión. Selección aleatoria con semilla fija dentro de cada criterio.}
+\end{figure}
+
+\subsection{Caracterización de la digitalización (OE1)}
+\label{sec:caracterizacion}
+
+La caracterización se hizo sobre las \FinNImagenes{} imágenes, sin descartar
+ninguna, y corrigió varios supuestos de la documentación y de la propia
+formulación:
+
+\begin{table}[H]
+\centering
+\small
+\caption{Lo que se suponía en la formulación y lo que se encontró}
+\begin{tabular}{@{}p{3.2cm}p{5cm}p{5.6cm}@{}}
+\toprule
+\textbf{Propiedad} & \textbf{Supuesto inicial} & \textbf{Hallazgo} \\
+\midrule
+Profundidad & Montgomery de 12 bits & \FinBitsMC{} bits efectivos en Montgomery y
+\FinBitsSH{} en Shenzhen (archivos \texttt{uint8}) \\
+Escala invertida & Shenzhen invertida & \FinInvertidas{} imágenes invertidas: no se
+aplicó corrección \\
+Canales & Shenzhen en RGB & Tres canales idénticos, verificados uno a uno; se toma
+un canal \\
+Tamaño & Montgomery homogéneo & Montgomery: siempre 4020 por 4892, con relleno negro
+de hasta el 67\,\% de la imagen. Shenzhen: 525 tamaños distintos en 662 imágenes \\
+Orientación & No considerada & Ambos mezclan orientaciones: 97 verticales y 41
+horizontales en Montgomery; 368 y 294 en Shenzhen \\
+Archivos anómalos & Nueve archivos pequeños & Son los nueve pacientes menores de
+dos años: el campo se ajusta al paciente \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{dimensiones.png}
+\caption{Dimensiones por origen en la cohorte de entrenamiento. Montgomery entrega
+siempre el mismo tamaño de archivo; Shenzhen lo ajusta al paciente.}
+\end{figure}
+
+\paragraph{Variabilidad de intensidad.} La mediana de intensidad es de 111,0 en
+Montgomery y 173,5 en Shenzhen (en escala de 0 a 255), mientras que dentro de cada
+origen las clases apenas difieren. \textbf{El efecto del sitio supera al de la
+clase}: un descriptor de intensidad que separara las clases estaría separando
+hospitales. Por eso toda métrica del proyecto se reporta estratificada por origen.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{intensidad.png}
+\caption{Histogramas por imagen y resumen por origen en la cohorte de
+entrenamiento. Los dos orígenes forman nubes casi disjuntas.}
+\end{figure}
+
+\subsection{Calidad y partición}
+
+Una imagen es \emph{aceptada} si pasa los controles de lectura, dimensiones y
+canales. Las imágenes sin máscara de referencia participan en la caracterización,
+pero no en la evaluación contra la referencia. Ningún conjunto incluye
+identificador de paciente: las lecturas clínicas permitieron demostrar dos pacientes
+con varias imágenes, que se agrupan para que nunca crucen particiones.
+
+La partición se fijó una sola vez (70/15/15 por paciente, estratificada por origen
+y clase, semilla 20262) y se conservó en todos los laboratorios. La edad no se
+estratificó, para no dejar celdas de uno o dos elementos; su reparto se verificó
+después y es comparable entre particiones.
+
+\input{final_particion}

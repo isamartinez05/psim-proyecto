@@ -1,0 +1,66 @@
+﻿\section{Matriz de técnicas y galería}
+
+De las \FinTecnicasTotal{} técnicas comprometidas en la formulación,
+\FinTecnicasCompletas{} se implementaron con código y producto verificables y
+\FinTecnicasNoAplica{} se justificaron como no aplicables: la corrección de escala
+invertida (ninguna imagen estaba invertida), la exploración HSV (radiografías en
+gris con canales idénticos) y la regresión logística en el proyecto (la ruta
+binaria no aplica). El archivo y el producto reales de cada técnica están en
+\texttt{docs/matriz\_tecnicas\_implementacion.csv}, y
+\texttt{scripts/auditar\_matriz.py} lo verifica automáticamente.
+
+\input{final_matriz}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth]{filtros_comparacion.png}
+\caption{Filtros de media y gaussiano.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth]{pasabajas_comparacion.png}
+\caption{Pasa-bajas gaussiano y Butterworth en frecuencia.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth]{cwt_perfil.png}
+\caption{Transformada wavelet continua sobre un perfil horizontal.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth]{reconstruccion_dwt.png}
+\caption{Reconstrucción quitando detalles wavelet de escala en escala.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth]{ecualizacion_comparacion.png}
+\caption{Ecualización global y CLAHE.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth]{transformaciones_intensidad.png}
+\caption{Transformaciones puntuales de intensidad.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth]{morfologia_pasos.png}
+\caption{Erosión, dilatación, apertura y cierre.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{tophat_blackhat.png}
+\caption{Top-hat y black-hat.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\textwidth]{distancia_borde.png}
+\caption{Transformada de distancia y borde de la máscara.}
+\end{figure}

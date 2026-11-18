@@ -1,0 +1,58 @@
+﻿\section{Reproducibilidad}
+
+Todo el proyecto se reconstruye desde los datos originales, que son de solo
+lectura. Las dependencias están bloqueadas en \texttt{uv.lock} con Python 3.13
+(la formulación preveía 3.12; se actualizó en el laboratorio de modelado, como
+exigía su guía). La secuencia pública es:
+
+\begin{verbatim}
+uv sync --locked
+uv run ruff check .
+uv run ruff format --check .
+uv run pytest
+uv run python scripts/reproduce.py
+latexmk -pdf -interaction=nonstopmode -halt-on-error
+        -outdir=build/reports reports/informe_final.tex
+\end{verbatim}
+
+\begin{table}[H]
+\centering
+\small
+\caption{Fases de \texttt{scripts/reproduce.py}}
+\begin{tabular}{@{}cp{11.8cm}@{}}
+\toprule
+\textbf{Fase} & \textbf{Contenido} \\
+\midrule
+1 & Manifiesto, inventario de calidad y partición \\
+2 & Exploración visual y numérica de entrenamiento \\
+3 & Tabla de características (imagen por estrategia), diccionario y decisiones \\
+4 & Modelado: selección en validación, evaluación única en prueba y bootstrap \\
+5 & OE2 (cinco lotes), OE3 en validación, OE4, OE5 y auditoría de la matriz \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Protocolos congelados.} Cada análisis que decide algo fijó sus reglas
+antes de ver resultados: \texttt{config/modelado\_lab005.json} (modelo),
+\texttt{results/modelado\_proyecto/frozen\_protocol.json} (modelo elegido antes de
+abrir la prueba) y \texttt{config/analisis\_oe5.json} (OE5). Los contratos guardan
+el hash SHA-256 de las tablas que analizan, y los guiones se detienen si una tabla
+cambió. El historial de git deja constancia del orden en que se hizo cada cosa.
+
+\paragraph{Pruebas automáticas.} Verifican la estructura exigida por la guía y el
+comportamiento de cada módulo: que ningún paciente cruce particiones, que ninguna
+columna derivada de la máscara manual entre como predictor, que la imputación se
+ajuste solo en entrenamiento, que las métricas coincidan con valores calculados a
+mano (Dice, delta de Cliff, Holm, error relativo) y que dos ejecuciones produzcan
+los mismos resultados.
+
+\paragraph{Sin números escritos a mano.} Las tablas y cifras de este informe se
+generan desde los archivos de resultados (\texttt{scripts/build\_tablas\_final\_tex.py}).
+Si un resultado cambia, basta con regenerar y recompilar.
+
+\paragraph{Verificación.} Una segunda ejecución reprodujo exactamente las métricas
+de prueba del modelo, y la evaluación de la prueba compara cada nueva ejecución con
+la guardada.
+% Si la reproduccion completa en el computador de Karol coincide, agregar aqui:
+% "La reproduccion completa desde los datos originales en un segundo computador
+% produjo los mismos resultados."
