@@ -111,6 +111,7 @@ def fase_4(rapido: bool) -> None:
     # La prueba se extrae solo despues de congelar el protocolo.
     extraer_reservada("test", rapido)
     correr("evaluar_prueba.py", "Fase 4: evaluacion unica en prueba")
+    correr("bootstrap_prueba.py", "Fase 4: intervalo bootstrap del error en prueba")
     correr("build_tablas_modelado_tex.py", "Fase 4: tablas y cifras del informe")
 
 
@@ -122,6 +123,7 @@ def fase_5() -> None:
     correr("oe2_wavelets.py", "Fase 5: OE2, wavelets y multirresolucion")
     correr("oe2_intensidad.py", "Fase 5: OE2, histogramas e intensidad")
     correr("oe2_geometria.py", "Fase 5: OE2, geometria y morfologia")
+    correr("oe3_validacion.py", "Fase 5: OE3, nueve estrategias en validacion")
     for nombre in ("features_validation.csv", "features_test.csv"):
         if not (RAIZ / "data" / "processed" / nombre).is_file():
             raise RuntimeError(f"OE4 y OE5 requieren {nombre} de la fase 4.")
@@ -190,6 +192,7 @@ def resumen_productos() -> None:
         "results/modelado_proyecto/frozen_protocol.json",
         "results/modelado_proyecto/test_metrics.csv",
         "results/modelado_proyecto/test_predictions.csv",
+        "results/modelado_proyecto/test_bootstrap.csv",
         "results/fase2/muestra_oe2.csv",
         "results/fase2/metricas_realce.csv",
         "results/fase2/decision_realce_espacial.csv",
@@ -199,6 +202,9 @@ def resumen_productos() -> None:
         "results/fase2/especificacion_por_origen.csv",
         "results/fase2/decision_realce_histograma.csv",
         "results/fase2/conectividad_componentes.csv",
+        "results/fase2/oe3_validacion_resumen.csv",
+        "results/fase2/oe3_ranking_train_validacion.csv",
+        "results/fase2/oe3_pruebas_pareadas.csv",
         "results/fase3/error_descriptores_particiones.csv",
         "results/fase3/oe5_pacientes.csv",
         "results/fase3/oe5_comparacion.csv",
